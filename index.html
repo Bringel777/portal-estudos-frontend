@@ -127,7 +127,7 @@
         .sidebar.recolhido .sidebar-profile { padding: 15px 0; justify-content: center; border-top: none; }
         .sidebar.recolhido .profile-info, .sidebar.recolhido .btn-logout { display: none; }
 
-        /* CONTEÚDO PRINCIPAL (Scroll Independente) */
+        /* CONTEÚDO PRINCIPAL */
         .main-content { flex: 1; padding: 30px 40px; overflow-y: auto; height: 100vh; position: relative;}
         .tab-content { display: none; animation: fadeIn 0.4s ease; }
         .tab-content.active { display: block; }
@@ -141,7 +141,6 @@
         .btn-outline { background: transparent; border: 1px solid var(--secondary); color: var(--secondary); padding: 6px 16px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; font-weight: bold; transition: 0.2s;}
         .btn-outline:hover { background: var(--secondary); color: white; }
 
-        /* Barras de Progresso */
         .progress-container { margin-bottom: 20px; }
         .progress-header { display: flex; justify-content: space-between; font-size: 1.05rem; margin-bottom: 8px; font-weight: bold;}
         .progress-bar-bg { width: 100%; background-color: var(--progress-bg); border-radius: 8px; overflow: hidden; height: 16px;}
@@ -154,7 +153,6 @@
         .mini-bar-bg { width: 100%; background: var(--progress-bg); height: 8px; border-radius: 4px; overflow: hidden;}
         .mini-bar-fill { height: 100%; transition: width 0.5s; }
 
-        /* Aba Disciplinas */
         .area-card { background: var(--card-bg); border: 1px solid var(--border); border-left: 5px solid var(--secondary); margin-bottom: 20px; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.02);}
         .area-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--hover-bg); border-bottom: 1px solid var(--border); }
         .sub-list { padding: 10px 20px 20px 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 15px; }
@@ -170,7 +168,6 @@
         .btn-add-sub { margin: 0 20px 20px 20px; padding: 10px 20px; background: var(--hover-bg); color: var(--title-color); border: 1px dashed var(--border); border-radius: 6px; cursor: pointer; font-size: 0.95rem; font-weight: bold; transition: 0.2s;}
         .btn-add-sub:hover { background: var(--border); }
 
-        /* PAINEL DE TEMPO GLOBAL */
         .time-panel-wrapper { position: relative; display: flex; flex-direction: column; background-color: var(--sidebar-bg); border-radius: 14px; overflow: hidden; margin-bottom: 20px; min-height: 220px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         .time-panel-content { position: relative; z-index: 2; padding: 25px 30px; display: flex; flex-direction: column; align-items: center; width: 100%; }
         .time-panel-controls { width: 100%; display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
@@ -183,7 +180,6 @@
         .time-huge { font-size: 4.5rem; font-weight: 200; font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-variant-numeric: tabular-nums; letter-spacing: -2px; color: white; text-shadow: 0 4px 20px rgba(0,0,0,0.2); line-height: 1; }
         .chart-tempo-overlay { position: absolute; bottom: 0; left: 0; width: 100%; height: 75%; z-index: 1; pointer-events: none; opacity: 0.85; }
 
-        /* Tarefas e inputs */
         .schedule-list { list-style: none; padding: 0; margin: 0; }
         .task-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid var(--border); background: var(--card-bg); border-radius: 6px; margin-bottom: 10px; transition: 0.3s; border-left: 5px solid transparent; }
         .task-content { display: flex; align-items: center; gap: 12px; flex: 1; }
@@ -212,7 +208,6 @@
         .ambiente-title { margin: 0; font-size: 2rem; color: var(--title-color); }
         .ambiente-area-name { font-size: 0.95rem; color: var(--text-muted); text-transform: uppercase; font-weight: bold; letter-spacing: 1px; margin-bottom: 5px;}
         
-        /* SCROLL LISTA DE REVISÕES */
         .amb-sugestoes-lista { max-height: 120px; overflow-y: auto; padding-right: 10px; list-style: none; margin: 0; padding-left: 0; }
         .amb-sugestoes-lista::-webkit-scrollbar { width: 6px; }
         .amb-sugestoes-lista::-webkit-scrollbar-thumb { background: rgba(235, 59, 90, 0.3); border-radius: 10px; }
@@ -221,7 +216,6 @@
         .btn-del-sugestao { background: rgba(235, 59, 90, 0.1); color: var(--danger); border: none; border-radius: 5px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; flex-shrink: 0; margin-left: 10px; }
         .btn-del-sugestao:hover { background: rgba(235, 59, 90, 0.2); }
 
-        /* ABA DESEMPENHO E IA */
         .ranking-card { border: 1px solid var(--border); border-radius: 12px; padding: 25px; background: var(--card-bg); margin-bottom: 20px; border-left: 5px solid #3498db; }
         .ranking-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px dashed var(--border); padding-bottom: 15px; }
         .ranking-params { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; background: var(--hover-bg); padding: 20px; border-radius: 10px; }
@@ -245,9 +239,6 @@
         @keyframes spin { 100% { transform: rotate(360deg); } }
         .loader-text { color: #ffffff; font-size: 1.4rem; font-weight: bold; text-align: center; max-width: 80%; line-height: 1.6; }
 
-        /* ====================================================
-           INTERFACE DE FOCO E SIMULADOR
-           ==================================================== */
         .aura-wrapper { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; overflow: hidden; z-index: -1; opacity: 0; visibility: hidden; transition: opacity 0.6s ease; }
         body.focus-mode .aura-wrapper { opacity: 1; visibility: visible; }
         .aura-blob { position: absolute; border-radius: 50%; filter: blur(90px); animation: spinAura 20s linear infinite; }
@@ -256,7 +247,6 @@
         .aura-3 { width: 40vw; height: 40vw; background: rgba(243, 156, 18, 0.25); top: 30vh; left: 25vw; animation-duration: 30s; }
         @keyframes spinAura { 0% { transform: rotate(0deg) scale(1); } 50% { transform: rotate(180deg) scale(1.05); } 100% { transform: rotate(360deg) scale(1); } }
 
-        /* TELA DE LOGIN OVERLAY */
         #login-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(10, 10, 12, 0.85); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); z-index: 99990; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 1; transition: opacity 0.5s ease; }
         #login-overlay.hidden { opacity: 0; pointer-events: none; visibility: hidden; }
         .login-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; padding: 50px 40px; text-align: center; max-width: 420px; width: 90%; box-shadow: 0 30px 60px rgba(0,0,0,0.5); display: flex; flex-direction: column; align-items: center; }
@@ -284,7 +274,6 @@
         body.focus-mode .btn-floating-tasks.visible { opacity: 1; visibility: visible; }
         .btn-floating-tasks:hover { background: rgba(60, 60, 65, 0.9); transform: translateY(-2px); }
 
-        /* BOTÃO E PAINEL DO SPOTIFY */
         .btn-floating-music { position: fixed; top: 40px; right: 110px; width: 54px; height: 54px; background: rgba(30, 215, 96, 0.15); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(30, 215, 96, 0.3); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: #1DB954; cursor: pointer; z-index: 1002; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); opacity: 0; visibility: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
         body.focus-mode .btn-floating-music.visible { opacity: 1; visibility: visible; }
         .btn-floating-music:hover { background: rgba(30, 215, 96, 0.3); color: white; transform: translateY(-2px); }
@@ -302,7 +291,6 @@
         .focus-task-item.current { color: var(--secondary); font-weight: bold; font-size: 1.05rem;}
         .focus-task-item:last-child { border: none; }
 
-        /* UI DO SPOTIFY */
         .spotify-player-container { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-top: 10px; }
         .spotify-album-art { width: 180px; height: 180px; border-radius: 12px; object-fit: cover; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .spotify-track-info { text-align: center; width: 100%; }
@@ -330,7 +318,6 @@
         .btn-skip-subtle { background: transparent; border: none; color: rgba(255,255,255,0.5); padding: 10px 20px; border-radius: 30px; cursor: pointer; transition: 0.2s; margin-top: 15px; font-size: 0.95rem;}
         .btn-skip-subtle:hover { color: white; background: rgba(255,255,255,0.1); }
 
-        /* AJUSTES NO SIMULADOR DE QUESTÕES (LIMITES E ELIMINAÇÃO) */
         #focus-simulador { max-width: 850px; max-height: 85vh; padding: 30px; flex-direction: column; }
         #simulador-active { overflow-y: auto; padding-right: 10px; flex: 1; margin-bottom: 10px; }
         #simulador-active::-webkit-scrollbar { width: 6px; }
@@ -366,7 +353,6 @@
 </head>
 <body>
 
-    <!-- AURA BACKGROUND -->
     <div class="aura-wrapper">
         <div class="aura-blob aura-1"></div>
         <div class="aura-blob aura-2"></div>
@@ -400,7 +386,6 @@
         <div class="loader-text" id="loader-message">Aguarde...</div>
     </div>
 
-    <!-- BARRA LATERAL FIXA -->
     <nav class="sidebar" id="main-sidebar">
         <div class="sidebar-header">
             <button class="hamburger-btn" onclick="toggleSidebar()" title="Expandir/Recolher Menu">
@@ -458,7 +443,6 @@
             </div>
         </div>
 
-        <!-- PERFIL DO USUÁRIO NA BARRA LATERAL -->
         <div class="sidebar-profile" id="sidebar-profile" style="display: none;">
             <img id="profile-pic" src="" alt="User" class="profile-avatar">
             <div class="profile-info">
@@ -746,10 +730,6 @@
             </div>
         </section>
 
-        <!-- ============================================== -->
-        <!-- CONTAINERS DE MODO FOCO (DE VOLTA PARA O MAIN) -->
-        <!-- ============================================== -->
-        
         <!-- 1. CRONÔMETRO -->
         <div id="focus-timer" class="focus-container" style="text-align: center;">
             <div class="current-task-label" id="timer-task-name">Preparando...</div>
@@ -846,8 +826,9 @@
         // --- ESTADO GLOBAL ---
         let bancoDeEditais = {};
         let ordemEditais = []; let editalAtualId = null;
+        let tarefasDoDia = []; let tarefasDaSemana = {}; 
         let historicoTempo = {}; let escalaTempo = 'semana'; let mostrarGraficoTempo = true; let chartTempoInstancia = null;
-        let tempoGlobalEstudadoSegundos = 0; let tarefasDoDia = []; let bancoDeRankings = []; 
+        let tempoGlobalEstudadoSegundos = 0; let bancoDeRankings = []; 
         let topicoAtivoAId = null; let topicoAtivoSId = null; let dragStartIndex = -1; let syncAtivo = false; 
         let bancoQuestoesLocal = {};
 
@@ -893,6 +874,10 @@
                 historicoTempo = {};
                 historicoTempo[getDataStringLocal()] = tempoGlobalEstudadoSegundos;
             }
+            
+            if(!tarefasDaSemana || typeof tarefasDaSemana !== 'object') {
+                tarefasDaSemana = { domingo: [], segunda: [], terca: [], quarta: [], quinta: [], sexta: [], sabado: [] };
+            }
         }
 
         // --- SISTEMA DE SALVAMENTO ---
@@ -901,27 +886,120 @@
                 localStorage.setItem('estudos_bancoDeEditais', JSON.stringify(bancoDeEditais));
                 localStorage.setItem('estudos_ordemEditais', JSON.stringify(ordemEditais));
                 localStorage.setItem('estudos_editalAtualId', editalAtualId);
+                localStorage.setItem('estudos_tarefasDoDia', JSON.stringify(tarefasDoDia));
+                localStorage.setItem('estudos_tarefasDaSemana', JSON.stringify(tarefasDaSemana));
                 localStorage.setItem('estudos_historicoTempo', JSON.stringify(historicoTempo));
+                localStorage.setItem('estudos_tempoGlobal', tempoGlobalEstudadoSegundos.toString());
                 localStorage.setItem('estudos_escalaTempo', escalaTempo);
                 localStorage.setItem('estudos_mostrarGraficoTempo', mostrarGraficoTempo);
-                localStorage.setItem('estudos_tarefasDoDia', JSON.stringify(tarefasDoDia));
                 localStorage.setItem('estudos_bancoDeRankings', JSON.stringify(bancoDeRankings));
                 localStorage.setItem('estudos_bancoQuestoes', JSON.stringify(bancoQuestoesLocal));
                 sincronizarComBackend(); 
             } catch(e) {}
         }
 
+        // --- COMUNICAÇÃO COM O NOVO BACKEND ---
         async function sincronizarComBackend() {
-            const edital = bancoDeEditais[editalAtualId]; if (!edital) return;
-            
-            // Pega o crachá do usuário logado
             const userStr = localStorage.getItem('estudos_user');
-            if(!userStr) return; // Se não logou, não envia para a nuvem
+            if(!userStr) return; 
             const userId = JSON.parse(userStr).uid;
 
-            const payload = { userId: userId, editalId: editalAtualId, nome: edital.nome, areas: edital.areas };
-            try { await fetch('https://api-portal-estudos.onrender.com/api/editais', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); } catch(err) {}
+            const edital = bancoDeEditais[editalAtualId]; 
+            if (edital) {
+                const payloadEdital = { userId: userId, editalId: editalAtualId, nome: edital.nome, areas: edital.areas };
+                fetch('https://api-portal-estudos.onrender.com/api/editais', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payloadEdital) }).catch(()=>{});
+            }
+
+            const payloadProfile = {
+                userId: userId,
+                tarefasDoDia: tarefasDoDia,
+                tarefasDaSemana: tarefasDaSemana,
+                historicoTempo: historicoTempo,
+                tempoGlobal: tempoGlobalEstudadoSegundos,
+                escalaTempo: escalaTempo,
+                mostrarGraficoTempo: mostrarGraficoTempo,
+                modoEscuro: document.body.getAttribute('data-theme') === 'dark',
+                syncAtivo: syncAtivo,
+                bancoQuestoes: bancoQuestoesLocal
+            };
+            fetch('https://api-portal-estudos.onrender.com/api/user-profile', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payloadProfile) }).catch(()=>{});
         }
+
+        async function baixarDadosDaNuvem(userId) {
+            try {
+                const resEditais = await fetch(`https://api-portal-estudos.onrender.com/api/editais/${userId}`);
+                const resProfile = await fetch(`https://api-portal-estudos.onrender.com/api/user-profile/${userId}`);
+                
+                if (resEditais.ok) {
+                    const editaisNuvem = await resEditais.json();
+                    bancoDeEditais = {}; ordemEditais = [];
+                    if (editaisNuvem.length > 0) {
+                        editaisNuvem.forEach(ed => { bancoDeEditais[ed.editalId] = ed; if (!ordemEditais.includes(ed.editalId)) ordemEditais.push(ed.editalId); });
+                        editalAtualId = ordemEditais[0];
+                    } else {
+                        const defaultId = 'edital-' + Date.now();
+                        bancoDeEditais[defaultId] = { nome: "Meu Primeiro Edital", areas: [] };
+                        ordemEditais.push(defaultId);
+                        editalAtualId = defaultId;
+                    }
+                }
+
+                if (resProfile.ok) {
+                    const profile = await resProfile.json();
+                    if (profile && profile.userId) {
+                        tarefasDoDia = profile.tarefasDoDia || [];
+                        tarefasDaSemana = profile.tarefasDaSemana || { domingo: [], segunda: [], terca: [], quarta: [], quinta: [], sexta: [], sabado: [] };
+                        historicoTempo = profile.historicoTempo || {};
+                        tempoGlobalEstudadoSegundos = profile.tempoGlobal || 0;
+                        escalaTempo = profile.escalaTempo || 'semana';
+                        mostrarGraficoTempo = profile.mostrarGraficoTempo !== false;
+                        syncAtivo = profile.syncAtivo || false;
+                        bancoQuestoesLocal = profile.bancoQuestoes || {};
+
+                        if(profile.modoEscuro) {
+                            document.body.setAttribute('data-theme', 'dark');
+                            const toggleDark = document.getElementById('toggle-dark');
+                            if(toggleDark) toggleDark.checked = true;
+                        } else {
+                            document.body.removeAttribute('data-theme');
+                            const toggleDark = document.getElementById('toggle-dark');
+                            if(toggleDark) toggleDark.checked = false;
+                        }
+                        const toggleSync = document.getElementById('toggle-sync');
+                        if(toggleSync) toggleSync.checked = syncAtivo;
+                        
+                        const elemSelect = document.getElementById('select-escala-tempo');
+                        const elemToggle = document.getElementById('toggle-grafico-tempo');
+                        if(elemSelect) elemSelect.value = escalaTempo;
+                        if(elemToggle) elemToggle.checked = mostrarGraficoTempo;
+                    }
+                }
+
+                // Salva os dados atualizados no cache local
+                localStorage.setItem('estudos_bancoDeEditais', JSON.stringify(bancoDeEditais));
+                localStorage.setItem('estudos_ordemEditais', JSON.stringify(ordemEditais));
+                localStorage.setItem('estudos_editalAtualId', editalAtualId);
+                localStorage.setItem('estudos_tarefasDoDia', JSON.stringify(tarefasDoDia));
+                localStorage.setItem('estudos_tarefasDaSemana', JSON.stringify(tarefasDaSemana));
+                localStorage.setItem('estudos_historicoTempo', JSON.stringify(historicoTempo));
+                localStorage.setItem('estudos_tempoGlobal', tempoGlobalEstudadoSegundos.toString());
+                localStorage.setItem('estudos_escalaTempo', escalaTempo);
+                localStorage.setItem('estudos_mostrarGraficoTempo', mostrarGraficoTempo);
+                localStorage.setItem('estudos_bancoQuestoes', JSON.stringify(bancoQuestoesLocal));
+                
+                sincronizarTelas();
+                renderizarMenuEditais();
+                renderizarTarefasDiaGlobais();
+                renderizarTarefasSemana();
+                atualizarDisplayTempoGlobal();
+                renderizarGraficoTempoOverlay();
+                
+                const titleElem = document.getElementById('titulo-visao-geral');
+                if (titleElem && bancoDeEditais[editalAtualId]) titleElem.innerText = `Progresso do Edital: ${bancoDeEditais[editalAtualId].nome}`;
+
+            } catch (err) { console.log("Erro ao sincronizar com a nuvem:", err); }
+        }
+        window.baixarDadosDaNuvem = baixarDadosDaNuvem;
 
         function carregarDadosLocais() {
             if (localStorage.getItem('estudos_bancoDeEditais')) {
@@ -934,52 +1012,12 @@
                     mostrarGraficoTempo = localStorage.getItem('estudos_mostrarGraficoTempo') !== 'false';
                     tempoGlobalEstudadoSegundos = parseInt(localStorage.getItem('estudos_tempoGlobal')) || 0; 
                     tarefasDoDia = JSON.parse(localStorage.getItem('estudos_tarefasDoDia')) || []; 
+                    tarefasDaSemana = JSON.parse(localStorage.getItem('estudos_tarefasDaSemana')) || { domingo: [], segunda: [], terca: [], quarta: [], quinta: [], sexta: [], sabado: [] }; 
                     bancoDeRankings = JSON.parse(localStorage.getItem('estudos_bancoDeRankings')) || [];
                     bancoQuestoesLocal = JSON.parse(localStorage.getItem('estudos_bancoQuestoes')) || {};
                 } catch(e) {}
             }
         }
-
-        // --- SISTEMA DE NUVEM ---
-        async function baixarDadosDaNuvem(userId) {
-            try {
-                const res = await fetch(`https://api-portal-estudos.onrender.com/api/editais/${userId}`);
-                if (res.ok) {
-                    const editaisNuvem = await res.json();
-                    
-                    // 1. LIMPEZA OBRIGATÓRIA: Zera o lixo da memória local
-                    bancoDeEditais = {};
-                    ordemEditais = [];
-
-                    if (editaisNuvem.length > 0) {
-                        // 2. Preenche com os dados reais protegidos do usuário
-                        editaisNuvem.forEach(ed => {
-                            bancoDeEditais[ed.editalId] = ed;
-                            if (!ordemEditais.includes(ed.editalId)) ordemEditais.push(ed.editalId);
-                        });
-                        editalAtualId = ordemEditais[0];
-                    } else {
-                        // 3. SE A CONTA FOR NOVA: Cria um edital em branco limpo!
-                        const defaultId = 'edital-' + Date.now();
-                        bancoDeEditais[defaultId] = { nome: "Meu Primeiro Edital", areas: [] };
-                        ordemEditais.push(defaultId);
-                        editalAtualId = defaultId;
-                        salvarDadosLocais(); // Salva esse edital limpo na nuvem nova
-                    }
-
-                    // 4. Atualiza a tela
-                    localStorage.setItem('estudos_bancoDeEditais', JSON.stringify(bancoDeEditais));
-                    localStorage.setItem('estudos_ordemEditais', JSON.stringify(ordemEditais));
-                    localStorage.setItem('estudos_editalAtualId', editalAtualId);
-                    
-                    sincronizarTelas();
-                    renderizarMenuEditais();
-                    const titleElem = document.getElementById('titulo-visao-geral');
-                    if (titleElem && bancoDeEditais[editalAtualId]) titleElem.innerText = `Progresso do Edital: ${bancoDeEditais[editalAtualId].nome}`;
-                }
-            } catch (err) { console.log("Erro ao sincronizar com a nuvem:", err); }
-        }
-        window.baixarDadosDaNuvem = baixarDadosDaNuvem;
 
         // --- INTEGRAÇÃO DE LOGIN E PERFIL (VIA FIREBASE) ---
         function checkLogin() {
@@ -1126,9 +1164,6 @@
                 window.diaAtualId = diasIds[new Date().getDay()];
                 const titDia = document.getElementById('titulo-dia');
                 if(titDia) titDia.innerText = `Cronograma do Dia (${nomesDiasDict[window.diaAtualId]})`;
-                const containerHoje = document.getElementById('container-tarefas-hoje');
-                const listaHoje = document.getElementById(`lista-${window.diaAtualId}`);
-                if (containerHoje && listaHoje) { containerHoje.appendChild(listaHoje); }
             } catch(e) {}
 
             try {
@@ -1143,7 +1178,7 @@
                 renderizarGraficoTempoOverlay();
             } catch(e) {}
 
-            try { renderizarMenuEditais(); selecionarEdital(editalAtualId); renderizarTarefasDiaGlobais(); } catch(e) {}
+            try { renderizarMenuEditais(); selecionarEdital(editalAtualId); renderizarTarefasDiaGlobais(); renderizarTarefasSemana(); } catch(e) {}
             try { checkSpotifyAuth(); } catch(e) {}
         }
 
@@ -1152,7 +1187,7 @@
         // --- PAINEL DE TEMPO INOVADOR ---
         function mudarEscalaTempo(novaEscala) {
             escalaTempo = novaEscala; localStorage.setItem('estudos_escalaTempo', escalaTempo);
-            atualizarDisplayTempoGlobal(); renderizarGraficoTempoOverlay();
+            atualizarDisplayTempoGlobal(); renderizarGraficoTempoOverlay(); salvarDadosLocais();
         }
 
         function alternarGraficoTempo(mostrar) {
@@ -1160,6 +1195,7 @@
             const overlay = document.getElementById('chart-tempo-overlay');
             if(overlay) overlay.style.display = mostrar ? 'block' : 'none';
             if (mostrar) renderizarGraficoTempoOverlay();
+            salvarDadosLocais();
         }
 
         function resetarTempoEstudado() {
@@ -1168,7 +1204,7 @@
                 if (escalaTempo === 'dia') { const hoje = getDataStringLocal(); historicoTempo[hoje] = 0; } 
                 else if (escalaTempo === 'semana') { getUltimosDias(7).forEach(d => historicoTempo[d] = 0); } 
                 else if (escalaTempo === 'mes') { getUltimosDias(30).forEach(d => historicoTempo[d] = 0); }
-                salvarDadosLocais(); atualizarDisplayTempoGlobal(); renderizarGraficoTempoOverlay();
+                atualizarDisplayTempoGlobal(); renderizarGraficoTempoOverlay(); salvarDadosLocais(); 
             }
         }
 
@@ -1206,8 +1242,8 @@
         }
 
         // --- PREFERÊNCIAS BASE ---
-        function alternarModoEscuro(ativo) { if (ativo) { document.body.setAttribute('data-theme', 'dark'); localStorage.setItem('estudos_modoEscuro', 'true'); } else { document.body.removeAttribute('data-theme'); localStorage.setItem('estudos_modoEscuro', 'false'); } atualizarEstatisticasGlobais(); renderizarGraficoTempoOverlay(); }
-        function alternarSync(ativo) { syncAtivo = ativo; localStorage.setItem('estudos_sync', ativo ? 'true' : 'false'); }
+        function alternarModoEscuro(ativo) { if (ativo) { document.body.setAttribute('data-theme', 'dark'); localStorage.setItem('estudos_modoEscuro', 'true'); } else { document.body.removeAttribute('data-theme'); localStorage.setItem('estudos_modoEscuro', 'false'); } atualizarEstatisticasGlobais(); renderizarGraficoTempoOverlay(); salvarDadosLocais();}
+        function alternarSync(ativo) { syncAtivo = ativo; localStorage.setItem('estudos_sync', ativo ? 'true' : 'false'); salvarDadosLocais();}
         function toggleSidebar() { document.getElementById('main-sidebar').classList.toggle('recolhido'); }
         function toggleProgressoDetalhes() { const container = document.getElementById('progress-bars-container'); const btn = document.getElementById('btn-toggle-progresso'); container.classList.toggle('show-minibars'); btn.innerText = container.classList.contains('show-minibars') ? 'Ocultar Tópicos ▲' : 'Ver Tópicos ▼'; }
 
@@ -1466,9 +1502,37 @@
         function toggleConcluidaTarefa(id, status) { tarefasDoDia.find(t => t.id === id).concluida = status; salvarDadosLocais(); renderizarTarefasDiaGlobais(); }
         function toggleWeeklySchedule() { const m = document.getElementById('weekly-schedule-container'); if(m) m.style.display = m.style.display === 'block' ? 'none' : 'block'; }
         function toggleAccordion(btn) { const c = btn.nextElementSibling; const i = btn.querySelector('span'); if (c.style.display === 'block') { c.style.display = 'none'; btn.style.background = 'var(--hover-bg)'; i.innerText = '▼'; } else { c.style.display = 'block'; btn.style.background = 'var(--secondary)'; btn.style.color = 'white'; i.innerText = '▲'; } }
-        function criarElementoTarefaSemana(texto) { const li = document.createElement('li'); li.className = 'task-item'; li.innerHTML = `<div class="task-content"><input type="checkbox"> <span class="task-text">${texto}</span></div><div class="task-actions"><input type="color" value="#0fb9b1" class="color-picker" oninput="this.parentElement.parentElement.style.borderLeft='5px solid '+this.value;"><button class="btn-icon" onclick="editarTarefaSemana(this)">✏️</button><button class="btn-icon" onclick="this.parentElement.parentElement.style.opacity='0'; setTimeout(()=>this.parentElement.parentElement.remove(), 300)">🗑️</button></div>`; return li; }
-        function editarTarefaSemana(btnElement) { const spanElement = btnElement.closest('.task-item').querySelector('.task-text'); makeInlineEditable(spanElement, spanElement.innerText, (newVal) => { spanElement.innerText = newVal; }); }
-        function adicionarTarefaSemana(diaId) { const input = document.getElementById('input-' + diaId); if (input.value.trim() !== '') { document.getElementById('lista-' + diaId).appendChild(criarElementoTarefaSemana(input.value.trim())); input.value = ''; } }
+        
+        // NOVO: Renderizador Profissional das Tarefas da Semana
+        function renderizarTarefasSemana() {
+            const diasIds = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'];
+            diasIds.forEach(dia => {
+                const ul = document.getElementById('lista-' + dia);
+                if(ul) {
+                    ul.innerHTML = '';
+                    if(tarefasDaSemana[dia]) {
+                        tarefasDaSemana[dia].forEach(t => {
+                            ul.innerHTML += `<li class="task-item" style="border-left: 5px solid ${t.cor};"><div class="task-content"><input type="checkbox" ${t.concluida ? 'checked' : ''} onchange="toggleWeeklyTask('${dia}', '${t.id}', this.checked)"><span class="task-text" style="${t.concluida ? 'text-decoration:line-through; opacity:0.5;' : ''}">${t.texto}</span></div><div class="task-actions"><input type="color" value="${t.cor}" class="color-picker" onchange="colorWeeklyTask('${dia}', '${t.id}', this.value)"><button class="btn-icon" onclick="editarTarefaSemanaObj('${dia}', '${t.id}', this)">✏️</button><button class="btn-icon" onclick="deletarTarefaSemana('${dia}', '${t.id}')">🗑️</button></div></li>`;
+                        });
+                    }
+                }
+            });
+        }
+
+        function toggleWeeklyTask(dia, id, status) { tarefasDaSemana[dia].find(t => t.id === id).concluida = status; salvarDadosLocais(); renderizarTarefasSemana(); }
+        function colorWeeklyTask(dia, id, cor) { tarefasDaSemana[dia].find(t => t.id === id).cor = cor; salvarDadosLocais(); renderizarTarefasSemana(); }
+        function editarTarefaSemanaObj(dia, id, btn) { const span = btn.closest('.task-item').querySelector('.task-text'); const t = tarefasDaSemana[dia].find(t => t.id === id); makeInlineEditable(span, t.texto, (newVal) => { t.texto = newVal; salvarDadosLocais(); renderizarTarefasSemana(); }); }
+        function deletarTarefaSemana(dia, id) { tarefasDaSemana[dia] = tarefasDaSemana[dia].filter(t => t.id !== id); salvarDadosLocais(); renderizarTarefasSemana(); }
+        
+        function adicionarTarefaSemana(diaId) { 
+            const input = document.getElementById('input-' + diaId); 
+            if (input.value.trim() !== '') { 
+                if(!tarefasDaSemana[diaId]) tarefasDaSemana[diaId] = [];
+                tarefasDaSemana[diaId].push({ id: 'w'+Date.now(), texto: input.value.trim(), concluida: false, cor: '#0fb9b1' });
+                input.value = ''; 
+                salvarDadosLocais(); renderizarTarefasSemana(); 
+            } 
+        }
 
         // --- MODO FOCO GERAL E BOTÃO SAIR ---
         let filaCronometro = []; let indexCronometro = 0; let timerInterval = null; let tempoRestanteSegundos = 0; let timerRodando = false; let tempoTotalDaTarefaAtual = 0;
@@ -1778,7 +1842,6 @@
             if (!inputCargo) { alert("Por favor, digite o nome exato do cargo antes de analisar o edital."); return; }
             if (!input.files || input.files.length === 0) { alert("Por favor, selecione arquivo PDF primeiro."); return; }
 
-            // Pega o crachá do usuário logado
             const userStr = localStorage.getItem('estudos_user');
             if(!userStr) { alert("Você precisa fazer login para analisar o PDF."); return; }
             const userId = JSON.parse(userStr).uid;
@@ -1786,7 +1849,7 @@
             const arquivo = input.files[0]; const formData = new FormData(); 
             formData.append('cargo', inputCargo); 
             formData.append('arquivoPdf', arquivo);
-            formData.append('userId', userId); // Adiciona o ID ao envio
+            formData.append('userId', userId); 
 
             const btnGerar = document.getElementById('btn-gerar'); const fullscreenLoader = document.getElementById('fullscreen-loader'); const loaderMessage = document.getElementById('loader-message');
             btnGerar.style.display = 'none'; fullscreenLoader.style.display = 'flex';
@@ -1837,7 +1900,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, OAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        // As chaves exclusivas do seu projeto
         const firebaseConfig = {
             apiKey: "AIzaSyAVQAXBRggX3Swl52BYXqmMPaKmL5lCaGg",
             authDomain: "bringel-portal-de-estudos.firebaseapp.com",
@@ -1852,7 +1914,6 @@
         const googleProvider = new GoogleAuthProvider();
         const microsoftProvider = new OAuthProvider('microsoft.com');
 
-        // Função para salvar no LocalStorage e avisar ao seu site que alguém logou
         function updateUI(user) {
             if (user) {
                 const userData = {
@@ -1863,22 +1924,15 @@
                 };
                 localStorage.setItem('estudos_user', JSON.stringify(userData));
                 
-                // NOVO: Chama o banco de dados e puxa tudo desse usuário!
                 if(window.baixarDadosDaNuvem) window.baixarDadosDaNuvem(user.uid);
-
             } else {
                 localStorage.removeItem('estudos_user');
             }
-            // Dispara a sua função original de atualizar a tela (que oculta a janela)
             if(window.checkLogin) window.checkLogin();
         }
 
-        // Fica observando o estado o tempo todo
-        onAuthStateChanged(auth, (user) => {
-            updateUI(user);
-        });
+        onAuthStateChanged(auth, (user) => { updateUI(user); });
 
-        // Configuração do botão Google
         const btnGoogle = document.getElementById('btn-login-google');
         if(btnGoogle) {
             const originalGoogleHtml = btnGoogle.innerHTML;
@@ -1895,7 +1949,6 @@
             });
         }
 
-        // Configuração do botão Microsoft (Hotmail/Outlook)
         const btnMicrosoft = document.getElementById('btn-login-microsoft');
         if(btnMicrosoft) {
             const originalMicrosoftHtml = btnMicrosoft.innerHTML;
@@ -1906,31 +1959,35 @@
                     btnMicrosoft.innerHTML = originalMicrosoftHtml;
                 } catch (error) {
                     console.error("Erro Microsoft:", error);
-                    alert("Falha no login com a Microsoft. Lembre-se de ativar o provedor Microsoft no painel do Firebase!");
+                    alert("Falha no login com a Microsoft.");
                     btnMicrosoft.innerHTML = originalMicrosoftHtml;
                 }
             });
         }
 
-        // Configuração do botão Sair (Logout)
+        // --- LOGOUT COM LIMPEZA DE CACHE PROFUNDA ---
         const btnLogout = document.getElementById('btn-logout-firebase');
         if(btnLogout) {
             btnLogout.addEventListener('click', async () => {
                 try {
-                    // 1. Desloga do Google/Firebase
                     await signOut(auth);
                     
-                    // 2. LIMPEZA PROFUNDA: Destrói todo o cache do usuário antigo
+                    // Limpeza absoluta da memória local
                     localStorage.removeItem('estudos_user');
                     localStorage.removeItem('estudos_bancoDeEditais');
                     localStorage.removeItem('estudos_ordemEditais');
                     localStorage.removeItem('estudos_editalAtualId');
                     localStorage.removeItem('estudos_historicoTempo');
                     localStorage.removeItem('estudos_tempoGlobal');
+                    localStorage.removeItem('estudos_escalaTempo');
+                    localStorage.removeItem('estudos_mostrarGraficoTempo');
                     localStorage.removeItem('estudos_tarefasDoDia');
+                    localStorage.removeItem('estudos_tarefasDaSemana');
+                    localStorage.removeItem('estudos_bancoDeRankings');
                     localStorage.removeItem('estudos_bancoQuestoes');
+                    localStorage.removeItem('estudos_modoEscuro');
+                    localStorage.removeItem('estudos_sync');
                     
-                    // 3. Atualiza a página para zerar a memória RAM do navegador
                     window.location.reload();
                 } catch (error) {
                     console.error("Erro ao sair:", error);
