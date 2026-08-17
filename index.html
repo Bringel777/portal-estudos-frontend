@@ -278,7 +278,7 @@
         body.focus-mode .btn-floating-music.visible { opacity: 1; visibility: visible; }
         .btn-floating-music:hover { background: rgba(30, 215, 96, 0.3); color: white; transform: translateY(-2px); }
 
-        /* NOVO BOTÃO TELA CHEIA */
+        /* NOVO: BOTÃO TELA CHEIA (FULLSCREEN) */
         .btn-floating-fullscreen { position: fixed; top: 40px; right: 180px; width: 54px; height: 54px; background: rgba(40, 40, 45, 0.8); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: white; cursor: pointer; z-index: 1002; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); opacity: 0; visibility: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
         body.focus-mode .btn-floating-fullscreen.visible { opacity: 1; visibility: visible; }
         .btn-floating-fullscreen:hover { background: rgba(60, 60, 65, 0.9); transform: translateY(-2px); }
@@ -360,6 +360,7 @@
 </head>
 <body>
 
+    <!-- AURA BACKGROUND -->
     <div class="aura-wrapper">
         <div class="aura-blob aura-1"></div>
         <div class="aura-blob aura-2"></div>
@@ -689,7 +690,7 @@
                     <span style="color: var(--success); font-weight: bold; font-size: 1.1rem;">Acertos: <span id="lbl-acertos-globais">0</span></span>
                     <span style="color: var(--danger); font-weight: bold; font-size: 1.1rem;">Erros: <span id="lbl-erros-globais">0</span></span>
                 </div>
-                <div style="width: 100%; max-width: 320px; margin: 0 auto;">
+                <div style="width: 100%; max-width: 320px; margin: 0 auto; position: relative;">
                     <canvas id="graficoPizza"></canvas>
                 </div>
             </div>
@@ -1268,13 +1269,25 @@
 
         // --- TELA CHEIA (FULLSCREEN) ---
         function toggleFullScreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    console.log("Erro ao tentar tela cheia:", err.message);
-                });
+            if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen();
+                } else if (document.documentElement.msRequestFullscreen) {
+                    document.documentElement.msRequestFullscreen();
+                } else if (document.documentElement.mozRequestFullScreen) {
+                    document.documentElement.mozRequestFullScreen();
+                } else if (document.documentElement.webkitRequestFullscreen) {
+                    document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+                }
             } else {
                 if (document.exitFullscreen) {
                     document.exitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
                 }
             }
         }
@@ -1582,8 +1595,11 @@
             const btnMusic = document.getElementById('btn-floating-music'); if(btnMusic) btnMusic.classList.remove('visible');
             const btnFull = document.getElementById('btn-floating-fullscreen'); if(btnFull) btnFull.classList.remove('visible');
 
-            if (document.fullscreenElement) {
-                document.exitFullscreen().catch(()=>{});
+            if (document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.msFullscreenElement) {
+                if (document.exitFullscreen) document.exitFullscreen().catch(()=>{});
+                else if (document.msExitFullscreen) document.msExitFullscreen();
+                else if (document.mozCancelFullScreen) document.mozCancelFullScreen();
+                else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
             }
 
             try { atualizarDisplayTempoGlobal(); renderizarGraficoTempoOverlay(); atualizarEstatisticasGlobais(); salvarDadosLocais(); sincronizarTelas(); } catch(e) {}
@@ -1687,7 +1703,8 @@
         let simRespondidasMix = 0; let simRespondidasSaved = 0; let simTotalSaved = 0;
 
         function atualizarEstatisticasGlobais() {
-            const edital = bancoDeEditais[editalAtualId]; if(!edital) return; let ac = 0, er = 0; 
+            const edital = bancoDeEditais[editalAtualId]; if(!edital) return; 
+            let ac = 0, er = 0; 
             
             if(edital.areas) { 
                 edital.areas.forEach(a => { 
@@ -1700,28 +1717,59 @@
                 }); 
             }
             
-            // Força a atualização do texto visual de estatísticas
+            // Backup de emergência: se der 0, varre o banco local para buscar questões já respondidas
+            if (ac === 0 && er === 0 && bancoQuestoesLocal) {
+                Object.values(bancoQuestoesLocal).forEach(listaQuestoes => {
+                    if (Array.isArray(listaQuestoes)) {
+                        listaQuestoes.forEach(q => {
+                            if (q.respondida) { if (q.acertou) ac++; else er++; }
+                        });
+                    }
+                });
+            }
+
+            // Atualiza os contadores de texto
             const lblAcertos = document.getElementById('lbl-acertos-globais');
             const lblErros = document.getElementById('lbl-erros-globais');
             if(lblAcertos) lblAcertos.innerText = ac;
             if(lblErros) lblErros.innerText = er;
 
+            // Renderiza o gráfico blindado
             if (typeof Chart !== 'undefined') {
                 const canvas = document.getElementById('graficoPizza');
                 if(canvas) {
                     const ctx = canvas.getContext('2d'); 
                     if(window.graficoPizzaObj) window.graficoPizzaObj.destroy(); 
+                    
+                    let isZero = (ac === 0 && er === 0);
+                    let chartData = isZero ? [1] : [ac, er];
+                    let chartColors = isZero ? [document.body.getAttribute('data-theme') === 'dark' ? '#333333' : '#e1e8ed'] : ['#2ecc71', '#e74c3c'];
+                    let chartLabels = isZero ? ['Nenhuma questão respondida'] : ['Acertos', 'Erros'];
+
                     window.graficoPizzaObj = new Chart(ctx, { 
                         type: 'pie', 
                         data: { 
-                            labels: ['Acertos', 'Erros'], 
-                            datasets: [{ data: [ac, er], backgroundColor: ['#2ecc71', '#e74c3c'], borderColor: 'transparent' }] 
+                            labels: chartLabels, 
+                            datasets: [{ data: chartData, backgroundColor: chartColors, borderColor: 'transparent', hoverOffset: isZero ? 0 : 4 }] 
                         }, 
-                        options: { plugins: { legend: { labels: { color: document.body.getAttribute('data-theme') === 'dark' ? '#e3e3e3' : '#2f3640' } } } } 
+                        options: { 
+                            plugins: { 
+                                legend: { labels: { color: document.body.getAttribute('data-theme') === 'dark' ? '#e3e3e3' : '#2f3640' } },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            if (isZero) return ' Responda questões no Modo Foco para gerar gráfico';
+                                            return ' ' + context.label + ': ' + context.raw;
+                                        }
+                                    }
+                                }
+                            } 
+                        } 
                     });
                 }
             }
             
+            // Popula o campo de selecionar tópicos
             const select = document.getElementById('select-disciplina-simulado'); if(select) { select.innerHTML = ''; 
                 if(edital.areas) { edital.areas.forEach(area => { if(area && area.sub && area.sub.length > 0) { const group = document.createElement('optgroup'); group.label = area.nome; area.sub.forEach(sub => { const opt = document.createElement('option'); opt.value = `${area.id}|${sub.id}`; opt.innerText = sub.nome; group.appendChild(opt); }); select.appendChild(group); } }); }
             }
@@ -1839,7 +1887,7 @@
         function responderQuestaoSimulador(letraSelecionada, btnElement) {
             const q = simFila[0]; const certa = q.gabarito; const acertou = (letraSelecionada === certa);
 
-            // Grava a resposta e o status da questão permanentemente
+            // Grava a resposta e o status permanentemente na questão
             q.respondida = true;
             q.acertou = acertou;
             q.respostaUsuario = letraSelecionada;
@@ -1856,21 +1904,25 @@
             const eliminaBotoes = document.getElementById('focus-sim-options').querySelectorAll('.btn-eliminate');
             eliminaBotoes.forEach(b => { b.disabled = true; b.style.opacity = '0.2'; b.style.cursor = 'default'; });
 
-            // Incremento blindado no objeto do tópico e envio imediato
+            // Incremento cravado no Objeto Mestre
+            const subMestre = bancoDeEditais[editalAtualId].areas.find(a=>a.id===simAreaAtual.id).sub.find(s=>s.id===simTopicoAtual.id);
             if(acertou) {
-                simTopicoAtual.acertos = (parseInt(simTopicoAtual.acertos) || 0) + 1;
+                subMestre.acertos = (parseInt(subMestre.acertos) || 0) + 1;
+                simTopicoAtual.acertos = subMestre.acertos;
             } else {
-                simTopicoAtual.erros = (parseInt(simTopicoAtual.erros) || 0) + 1;
+                subMestre.erros = (parseInt(subMestre.erros) || 0) + 1;
+                simTopicoAtual.erros = subMestre.erros;
                 
-                if(!simTopicoAtual.detalhesErros) simTopicoAtual.detalhesErros = [];
+                if(!subMestre.detalhesErros) subMestre.detalhesErros = [];
                 const erroMsg = `Você errou um conceito da questão: "${q.enunciado.substring(0, 50)}..." - Revise!`;
-                if(!simTopicoAtual.detalhesErros.includes(erroMsg)) simTopicoAtual.detalhesErros.push(erroMsg);
+                if(!subMestre.detalhesErros.includes(erroMsg)) subMestre.detalhesErros.push(erroMsg);
             }
             
             if(simModo === 'mix') simRespondidasMix++; else simRespondidasSaved++;
-            
             atualizarUIContador();
-            atualizarEstatisticasGlobais(); // Força a atualização visual do gráfico em background
+            
+            // Força o Gráfico Global a subir
+            atualizarEstatisticasGlobais(); 
             salvarDadosLocais(); 
 
             const feedBox = document.getElementById('focus-sim-feedback'); const feedTitle = document.getElementById('feedback-title'); const feedText = document.getElementById('feedback-text');
