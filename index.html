@@ -915,7 +915,7 @@
         async function sincronizarComBackend() {
             const edital = bancoDeEditais[editalAtualId]; if (!edital) return;
             const payload = { editalId: editalAtualId, nome: edital.nome, areas: edital.areas };
-            try { await fetch('http://localhost:3000/api/editais', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); } catch(err) {}
+            try { await fetch('https://api-portal-estudos.onrender.com/api/editais', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); } catch(err) {}
         }
 
         function carregarDadosLocais() {
@@ -1625,7 +1625,7 @@
             isGeneratingQuestoes = true;
             try {
                 const payload = { topico: simTopicoAtual.nome, disciplina: simAreaAtual.nome, quantidade: quantidade };
-                const res = await fetch('http://localhost:3000/api/gerar-questoes', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+                const res = await fetch('https://api-portal-estudos.onrender.com/api/gerar-questoes', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
                 if(res.ok) {
                     const data = await res.json();
                     if(data.questoes && data.questoes.length > 0) {
@@ -1762,7 +1762,7 @@
             loaderMessage.innerHTML = '⏳ A Inteligência Artificial está lendo o PDF, filtrando seu cargo e mapeando as disciplinas...<br><span style="font-size: 0.9rem; font-weight: normal; color: #bdc3c7; display:block; margin-top:10px;">Isso pode levar de 30 a 60 segundos. Não feche a página.</span>';
 
             try {
-                const response = await fetch('http://localhost:3000/api/analisar-pdf', { method: 'POST', body: formData });
+                const response = await fetch('https://api-portal-estudos.onrender.com/api/analisar-pdf', { method: 'POST', body: formData });
                 if (!response.ok) throw new Error("Erro na comunicação com o servidor.");
                 const editalDaIA = await response.json();
                 fullscreenLoader.style.display = 'none';
