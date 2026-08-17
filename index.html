@@ -278,6 +278,11 @@
         body.focus-mode .btn-floating-music.visible { opacity: 1; visibility: visible; }
         .btn-floating-music:hover { background: rgba(30, 215, 96, 0.3); color: white; transform: translateY(-2px); }
 
+        /* NOVO BOTÃO TELA CHEIA */
+        .btn-floating-fullscreen { position: fixed; top: 40px; right: 180px; width: 54px; height: 54px; background: rgba(40, 40, 45, 0.8); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: white; cursor: pointer; z-index: 1002; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); opacity: 0; visibility: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        body.focus-mode .btn-floating-fullscreen.visible { opacity: 1; visibility: visible; }
+        .btn-floating-fullscreen:hover { background: rgba(60, 60, 65, 0.9); transform: translateY(-2px); }
+
         .glass-task-panel { position: fixed; top: 20px; right: 20px; width: 380px; height: calc(100vh - 40px); background: rgba(20, 20, 25, 0.85); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; z-index: 1003; display: flex; flex-direction: column; padding: 25px; transform: translateX(120%); transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.5s; opacity: 0; box-shadow: -10px 10px 40px rgba(0,0,0,0.5); color: white; }
         .glass-task-panel.active { transform: translateX(0); opacity: 1; }
         .glass-panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; }
@@ -291,6 +296,7 @@
         .focus-task-item.current { color: var(--secondary); font-weight: bold; font-size: 1.05rem;}
         .focus-task-item:last-child { border: none; }
 
+        /* UI DO SPOTIFY */
         .spotify-player-container { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-top: 10px; }
         .spotify-album-art { width: 180px; height: 180px; border-radius: 12px; object-fit: cover; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .spotify-track-info { text-align: center; width: 100%; }
@@ -347,6 +353,7 @@
             .btn-close-focus-modern { top: 20px; left: 20px; padding: 10px 15px;}
             .btn-floating-tasks { top: 20px; right: 20px; width: 45px; height: 45px;}
             .btn-floating-music { top: 20px; right: 80px; width: 45px; height: 45px;}
+            .btn-floating-fullscreen { top: 20px; right: 140px; width: 45px; height: 45px;}
             #focus-simulador { max-height: calc(100vh - 100px); }
         }
     </style>
@@ -456,7 +463,7 @@
 
     </nav>
 
-    <!-- BOTÕES FLUTUANTES UNIVERSAIS -->
+    <!-- BOTÕES FLUTUANTES UNIVERSAIS NO MODO FOCO -->
     <button class="btn-close-focus-modern" onclick="sairModoFocoGlobal()" title="Sair do Modo Foco">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
         <span>Sair</span>
@@ -464,6 +471,13 @@
 
     <button id="btn-floating-music" class="btn-floating-music" onclick="toggleFocusMusic()" title="Música e Foco">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+    </button>
+
+    <!-- NOVO: BOTÃO TELA CHEIA (FULLSCREEN) -->
+    <button id="btn-floating-fullscreen" class="btn-floating-fullscreen" onclick="toggleFullScreen()" title="Tela Cheia">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+        </svg>
     </button>
 
     <button id="btn-floating-tasks" class="btn-floating-tasks" onclick="toggleFocusTasks()" title="Ver Tarefas">
@@ -671,6 +685,10 @@
         <section id="questoes" class="tab-content">
             <div class="card" style="text-align: center;">
                 <h3 style="border-bottom: 2px solid var(--secondary); padding-bottom: 10px;">Desempenho Global</h3>
+                <div style="display: flex; justify-content: center; gap: 20px; margin-bottom: 15px;">
+                    <span style="color: var(--success); font-weight: bold; font-size: 1.1rem;">Acertos: <span id="lbl-acertos-globais">0</span></span>
+                    <span style="color: var(--danger); font-weight: bold; font-size: 1.1rem;">Erros: <span id="lbl-erros-globais">0</span></span>
+                </div>
                 <div style="width: 100%; max-width: 320px; margin: 0 auto;">
                     <canvas id="graficoPizza"></canvas>
                 </div>
@@ -975,7 +993,6 @@
                     }
                 }
 
-                // Salva os dados atualizados no cache local
                 localStorage.setItem('estudos_bancoDeEditais', JSON.stringify(bancoDeEditais));
                 localStorage.setItem('estudos_ordemEditais', JSON.stringify(ordemEditais));
                 localStorage.setItem('estudos_editalAtualId', editalAtualId);
@@ -996,6 +1013,8 @@
                 
                 const titleElem = document.getElementById('titulo-visao-geral');
                 if (titleElem && bancoDeEditais[editalAtualId]) titleElem.innerText = `Progresso do Edital: ${bancoDeEditais[editalAtualId].nome}`;
+
+                atualizarEstatisticasGlobais();
 
             } catch (err) { console.log("Erro ao sincronizar com a nuvem:", err); }
         }
@@ -1246,6 +1265,19 @@
         function alternarSync(ativo) { syncAtivo = ativo; localStorage.setItem('estudos_sync', ativo ? 'true' : 'false'); salvarDadosLocais();}
         function toggleSidebar() { document.getElementById('main-sidebar').classList.toggle('recolhido'); }
         function toggleProgressoDetalhes() { const container = document.getElementById('progress-bars-container'); const btn = document.getElementById('btn-toggle-progresso'); container.classList.toggle('show-minibars'); btn.innerText = container.classList.contains('show-minibars') ? 'Ocultar Tópicos ▲' : 'Ver Tópicos ▼'; }
+
+        // --- TELA CHEIA (FULLSCREEN) ---
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log("Erro ao tentar tela cheia:", err.message);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
 
         function sincronizarTelas() { 
             try { renderizarProgresso(); } catch(e) {}
@@ -1503,7 +1535,6 @@
         function toggleWeeklySchedule() { const m = document.getElementById('weekly-schedule-container'); if(m) m.style.display = m.style.display === 'block' ? 'none' : 'block'; }
         function toggleAccordion(btn) { const c = btn.nextElementSibling; const i = btn.querySelector('span'); if (c.style.display === 'block') { c.style.display = 'none'; btn.style.background = 'var(--hover-bg)'; i.innerText = '▼'; } else { c.style.display = 'block'; btn.style.background = 'var(--secondary)'; btn.style.color = 'white'; i.innerText = '▲'; } }
         
-        // NOVO: Renderizador Profissional das Tarefas da Semana
         function renderizarTarefasSemana() {
             const diasIds = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'];
             diasIds.forEach(dia => {
@@ -1549,6 +1580,11 @@
             
             const btnFloat = document.getElementById('btn-floating-tasks'); if(btnFloat) btnFloat.classList.remove('visible');
             const btnMusic = document.getElementById('btn-floating-music'); if(btnMusic) btnMusic.classList.remove('visible');
+            const btnFull = document.getElementById('btn-floating-fullscreen'); if(btnFull) btnFull.classList.remove('visible');
+
+            if (document.fullscreenElement) {
+                document.exitFullscreen().catch(()=>{});
+            }
 
             try { atualizarDisplayTempoGlobal(); renderizarGraficoTempoOverlay(); atualizarEstatisticasGlobais(); salvarDadosLocais(); sincronizarTelas(); } catch(e) {}
         }
@@ -1588,6 +1624,7 @@
             document.getElementById('focus-timer').classList.add('active-focus'); 
             document.getElementById('btn-floating-tasks').classList.add('visible'); 
             document.getElementById('btn-floating-music').classList.add('visible');
+            document.getElementById('btn-floating-fullscreen').classList.add('visible');
             carregarTarefaCronometro(); 
         }
 
@@ -1651,13 +1688,40 @@
 
         function atualizarEstatisticasGlobais() {
             const edital = bancoDeEditais[editalAtualId]; if(!edital) return; let ac = 0, er = 0; 
-            if(edital.areas) { edital.areas.forEach(a => { if(a && a.sub) a.sub.forEach(s => { ac += (s.acertos||0); er += (s.erros||0); }); }); }
+            
+            if(edital.areas) { 
+                edital.areas.forEach(a => { 
+                    if(a && a.sub) {
+                        a.sub.forEach(s => { 
+                            ac += parseInt(s.acertos || 0); 
+                            er += parseInt(s.erros || 0); 
+                        }); 
+                    }
+                }); 
+            }
+            
+            // Força a atualização do texto visual de estatísticas
+            const lblAcertos = document.getElementById('lbl-acertos-globais');
+            const lblErros = document.getElementById('lbl-erros-globais');
+            if(lblAcertos) lblAcertos.innerText = ac;
+            if(lblErros) lblErros.innerText = er;
+
             if (typeof Chart !== 'undefined') {
                 const canvas = document.getElementById('graficoPizza');
                 if(canvas) {
-                    const ctx = canvas.getContext('2d'); if(window.graficoPizzaObj) window.graficoPizzaObj.destroy(); window.graficoPizzaObj = new Chart(ctx, { type: 'pie', data: { labels: ['Acertos', 'Erros'], datasets: [{ data: [ac, er], backgroundColor: ['#2ecc71', '#e74c3c'], borderColor: 'transparent' }] }, options: { plugins: { legend: { labels: { color: document.body.getAttribute('data-theme') === 'dark' ? '#e3e3e3' : '#2f3640' } } } } });
+                    const ctx = canvas.getContext('2d'); 
+                    if(window.graficoPizzaObj) window.graficoPizzaObj.destroy(); 
+                    window.graficoPizzaObj = new Chart(ctx, { 
+                        type: 'pie', 
+                        data: { 
+                            labels: ['Acertos', 'Erros'], 
+                            datasets: [{ data: [ac, er], backgroundColor: ['#2ecc71', '#e74c3c'], borderColor: 'transparent' }] 
+                        }, 
+                        options: { plugins: { legend: { labels: { color: document.body.getAttribute('data-theme') === 'dark' ? '#e3e3e3' : '#2f3640' } } } } 
+                    });
                 }
             }
+            
             const select = document.getElementById('select-disciplina-simulado'); if(select) { select.innerHTML = ''; 
                 if(edital.areas) { edital.areas.forEach(area => { if(area && area.sub && area.sub.length > 0) { const group = document.createElement('optgroup'); group.label = area.nome; area.sub.forEach(sub => { const opt = document.createElement('option'); opt.value = `${area.id}|${sub.id}`; opt.innerText = sub.nome; group.appendChild(opt); }); select.appendChild(group); } }); }
             }
@@ -1698,6 +1762,7 @@
             
             document.getElementById('focus-simulador').classList.add('active-focus'); 
             document.getElementById('btn-floating-music').classList.add('visible'); 
+            document.getElementById('btn-floating-fullscreen').classList.add('visible');
 
             document.getElementById('simulador-end-screen').style.display = 'none';
             document.getElementById('sim-info-disciplina').innerText = `SIMULADO: ${simAreaAtual.nome.toUpperCase()}`;
@@ -1774,6 +1839,11 @@
         function responderQuestaoSimulador(letraSelecionada, btnElement) {
             const q = simFila[0]; const certa = q.gabarito; const acertou = (letraSelecionada === certa);
 
+            // Grava a resposta e o status da questão permanentemente
+            q.respondida = true;
+            q.acertou = acertou;
+            q.respostaUsuario = letraSelecionada;
+
             const botoes = document.getElementById('focus-sim-options').querySelectorAll('.sim-option-btn');
             botoes.forEach(b => {
                 b.disabled = true;
@@ -1786,18 +1856,22 @@
             const eliminaBotoes = document.getElementById('focus-sim-options').querySelectorAll('.btn-eliminate');
             eliminaBotoes.forEach(b => { b.disabled = true; b.style.opacity = '0.2'; b.style.cursor = 'default'; });
 
-            if(acertou) simTopicoAtual.acertos++; else simTopicoAtual.erros++;
-            
-            if(simModo === 'mix') simRespondidasMix++; else simRespondidasSaved++;
-            atualizarUIContador();
-            salvarDadosLocais(); 
-
-            if(!acertou) {
+            // Incremento blindado no objeto do tópico e envio imediato
+            if(acertou) {
+                simTopicoAtual.acertos = (parseInt(simTopicoAtual.acertos) || 0) + 1;
+            } else {
+                simTopicoAtual.erros = (parseInt(simTopicoAtual.erros) || 0) + 1;
+                
                 if(!simTopicoAtual.detalhesErros) simTopicoAtual.detalhesErros = [];
                 const erroMsg = `Você errou um conceito da questão: "${q.enunciado.substring(0, 50)}..." - Revise!`;
                 if(!simTopicoAtual.detalhesErros.includes(erroMsg)) simTopicoAtual.detalhesErros.push(erroMsg);
-                salvarDadosLocais();
             }
+            
+            if(simModo === 'mix') simRespondidasMix++; else simRespondidasSaved++;
+            
+            atualizarUIContador();
+            atualizarEstatisticasGlobais(); // Força a atualização visual do gráfico em background
+            salvarDadosLocais(); 
 
             const feedBox = document.getElementById('focus-sim-feedback'); const feedTitle = document.getElementById('feedback-title'); const feedText = document.getElementById('feedback-text');
             feedBox.style.display = 'block'; feedBox.style.borderLeftColor = acertou ? 'var(--success)' : 'var(--danger)';
@@ -1972,7 +2046,6 @@
                 try {
                     await signOut(auth);
                     
-                    // Limpeza absoluta da memória local
                     localStorage.removeItem('estudos_user');
                     localStorage.removeItem('estudos_bancoDeEditais');
                     localStorage.removeItem('estudos_ordemEditais');
