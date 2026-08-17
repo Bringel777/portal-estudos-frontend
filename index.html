@@ -913,7 +913,13 @@
 
         async function sincronizarComBackend() {
             const edital = bancoDeEditais[editalAtualId]; if (!edital) return;
-            const payload = { editalId: editalAtualId, nome: edital.nome, areas: edital.areas };
+            
+            // Pega o crachá do usuário logado
+            const userStr = localStorage.getItem('estudos_user');
+            if(!userStr) return; // Se não logou, não envia para a nuvem
+            const userId = JSON.parse(userStr).uid;
+
+            const payload = { userId: userId, editalId: editalAtualId, nome: edital.nome, areas: edital.areas };
             try { await fetch('https://api-portal-estudos.onrender.com/api/editais', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); } catch(err) {}
         }
 
@@ -933,6 +939,31 @@
                 } catch(e) {}
             }
         }
+
+        // --- SISTEMA DE NUVEM ---
+        async function baixarDadosDaNuvem(userId) {
+            try {
+                const res = await fetch(`https://api-portal-estudos.onrender.com/api/editais/${userId}`);
+                if (res.ok) {
+                    const editaisNuvem = await res.json();
+                    if (editaisNuvem.length > 0) {
+                        editaisNuvem.forEach(ed => {
+                            bancoDeEditais[ed.editalId] = ed;
+                            if (!ordemEditais.includes(ed.editalId)) ordemEditais.push(ed.editalId);
+                        });
+                        editalAtualId = ordemEditais[0];
+                        localStorage.setItem('estudos_bancoDeEditais', JSON.stringify(bancoDeEditais));
+                        localStorage.setItem('estudos_ordemEditais', JSON.stringify(ordemEditais));
+                        localStorage.setItem('estudos_editalAtualId', editalAtualId);
+                        sincronizarTelas();
+                        renderizarMenuEditais();
+                        const titleElem = document.getElementById('titulo-visao-geral');
+                        if (titleElem && bancoDeEditais[editalAtualId]) titleElem.innerText = `Progresso do Edital: ${bancoDeEditais[editalAtualId].nome}`;
+                    }
+                }
+            } catch (err) { console.log("Erro ao sincronizar com a nuvem:", err); }
+        }
+        window.baixarDadosDaNuvem = baixarDadosDaNuvem;
 
         // --- INTEGRAÇÃO DE LOGIN E PERFIL (VIA FIREBASE) ---
         function checkLogin() {
@@ -1731,7 +1762,16 @@
             if (!inputCargo) { alert("Por favor, digite o nome exato do cargo antes de analisar o edital."); return; }
             if (!input.files || input.files.length === 0) { alert("Por favor, selecione um arquivo PDF primeiro."); return; }
 
-            const arquivo = input.files[0]; const formData = new FormData(); formData.append('cargo', inputCargo); formData.append('arquivoPdf', arquivo);
+            // Pega o crachá do usuário logado
+            const userStr = localStorage.getItem('estudos_user');
+            if(!userStr) { alert("Você precisa fazer login para analisar o PDF."); return; }
+            const userId = JSON.parse(userStr).uid;
+
+            const arquivo = input.files[0]; const formData = new FormData(); 
+            formData.append('cargo', inputCargo); 
+            formData.append('arquivoPdf', arquivo);
+            formData.append('userId', userId); // Adiciona o ID ao envio
+
             const btnGerar = document.getElementById('btn-gerar'); const fullscreenLoader = document.getElementById('fullscreen-loader'); const loaderMessage = document.getElementById('loader-message');
             btnGerar.style.display = 'none'; fullscreenLoader.style.display = 'flex';
             loaderMessage.innerHTML = '⏳ A Inteligência Artificial está lendo o PDF, filtrando seu cargo e mapeando as disciplinas...<br><span style="font-size: 0.9rem; font-weight: normal; color: #bdc3c7; display:block; margin-top:10px;">Isso pode levar de 30 a 60 segundos. Não feche a página.</span>';
@@ -1806,6 +1846,10 @@
                     photo: user.photoURL || "https://ui-avatars.com/api/?name=Estudante&background=0fb9b1&color=fff"
                 };
                 localStorage.setItem('estudos_user', JSON.stringify(userData));
+                
+                // NOVO: Chama o banco de dados e puxa tudo desse usuário!
+                if(window.baixarDadosDaNuvem) window.baixarDadosDaNuvem(user.uid);
+
             } else {
                 localStorage.removeItem('estudos_user');
             }
