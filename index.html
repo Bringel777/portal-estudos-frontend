@@ -1,0 +1,1802 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma de Estudos Avançada</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* VARIÁVEIS DE CORES */
+        :root {
+            --sidebar-bg: #1e272e;
+            --secondary: #0fb9b1;
+            --accent: #f39c12;
+            --success: #20bf6b; 
+            --danger: #eb3b5a;
+            --bg: #f1f2f6;
+            --card-bg: #ffffff;
+            --text: #2f3640;
+            --title-color: #1e272e;
+            --text-muted: #7f8c8d;
+            --border: #e1e8ed;
+            --hover-bg: #f8f9fa;
+            --progress-bg: #e1e8ed;
+            --info-bg: rgba(15, 185, 177, 0.1);
+        }
+
+        /* TEMA ESCURO */
+        [data-theme="dark"] {
+            --sidebar-bg: #131314;
+            --secondary: #21c9c0; 
+            --accent: #f5b041;
+            --success: #2ecc71;
+            --danger: #ff5252;
+            --bg: #000000;
+            --card-bg: #1e1e1e;
+            --text: #e3e3e3;
+            --title-color: #ffffff;
+            --text-muted: #9ba1a6;
+            --border: #333333;
+            --hover-bg: #282828;
+            --progress-bg: #333333;
+            --info-bg: rgba(33, 201, 192, 0.1);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            transition: background-color 0.4s ease, color 0.4s ease;
+        }
+
+        .card, .area-card, .sub-item-card, input, select, .sidebar, .task-item, .accordion-content {
+            transition: background-color 0.4s ease, border-color 0.4s ease, color 0.4s ease;
+        }
+
+        .inline-edit-input {
+            width: 100%; padding: 4px 8px; border: 2px solid var(--secondary); border-radius: 4px;
+            font-family: inherit; font-size: inherit; color: var(--title-color); background: var(--card-bg);
+            outline: none; box-shadow: 0 0 5px rgba(15, 185, 177, 0.3); flex: 1;
+        }
+
+        /* MENU LATERAL FIXO */
+        .sidebar {
+            width: 270px; background-color: var(--sidebar-bg); color: white; display: flex; flex-direction: column; 
+            transition: width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); z-index: 100; flex-shrink: 0; height: 100vh;
+        }
+        
+        .sidebar-header { display: flex; align-items: center; padding: 20px; gap: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .hamburger-btn { background: none; border: none; color: white; cursor: pointer; padding: 5px; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .hamburger-btn:hover { opacity: 0.7; }
+        .sidebar h2 { margin: 0; font-size: 1.25rem; white-space: nowrap; color: white; transition: opacity 0.3s; }
+
+        .sidebar.recolhido { width: 80px; }
+        .sidebar.recolhido .sidebar-header { padding: 20px 0; justify-content: center; }
+        .sidebar.recolhido h2 { display: none; opacity: 0; }
+        .sidebar.recolhido .nav-btn-text, .sidebar.recolhido .menu-title, .sidebar.recolhido .switch-container { display: none; }
+        .sidebar.recolhido .nav-btn { justify-content: center; padding: 15px 0; }
+        .sidebar.recolhido .edital-item-container { padding: 15px 0; justify-content: center; }
+        .sidebar.recolhido .edital-text-area, .sidebar.recolhido .edital-actions, .sidebar.recolhido .drag-handle { display: none; }
+        .sidebar.recolhido .icon-svg { margin: 0; }
+
+        .nav-btn { background: none; border: none; color: #bdc3c7; padding: 15px 20px; text-align: left; font-size: 0.95rem; cursor: pointer; transition: 0.3s; border-left: 4px solid transparent; display: flex; align-items: center; gap: 12px; width: 100%; }
+        .nav-btn:hover { background-color: rgba(255,255,255,0.05); color: white; }
+        .nav-btn.active { background-color: rgba(255,255,255,0.1); color: white; border-left-color: var(--secondary); font-weight: bold; }
+        .icon-svg { width: 22px; height: 22px; flex-shrink: 0; opacity: 0.8; }
+        .nav-btn:hover .icon-svg, .nav-btn.active .icon-svg { opacity: 1; }
+
+        .menu-section { border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; flex: 1; overflow-y: auto; min-height: 0; }
+        .menu-section::-webkit-scrollbar { width: 6px; }
+        .menu-section::-webkit-scrollbar-thumb { background-color: rgba(255,255,255,0.1); border-radius: 10px; }
+        .menu-title { color: #95a5a6; font-size: 0.75rem; padding: 0 20px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; white-space: nowrap;}
+        
+        .switch-container { display: flex; align-items: center; gap: 12px; margin-top: 10px; padding: 0 20px; }
+        .switch-label { font-size: 0.75rem; color: #bdc3c7; line-height: 1.3; flex: 1; }
+        .switch { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.2); transition: .4s; border-radius: 34px; border: 1px solid rgba(255,255,255,0.1); }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2);}
+        input:checked + .slider { background-color: var(--success); border-color: var(--success); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        .edital-item-container { display: flex; align-items: center; justify-content: space-between; padding: 10px 15px 10px 10px; margin-bottom: 2px; color: #bdc3c7; border-left: 4px solid transparent; transition: 0.2s; cursor: pointer; }
+        .edital-item-container.active-sub { background-color: rgba(255,255,255,0.1); color: white; border-left-color: var(--accent); font-weight: bold; }
+        .edital-item-container:hover { background-color: rgba(255,255,255,0.05); color: white; }
+        .edital-item-container.drag-over { border-top: 2px dashed var(--success); }
+        .drag-handle { cursor: grab; padding-right: 8px; opacity: 0.4; display: flex; align-items: center;}
+        .drag-handle:active { cursor: grabbing; opacity: 1; }
+        .edital-text-area { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.9rem; display: flex; align-items: center; gap: 8px;}
+        .edital-actions { display: flex; gap: 5px; opacity: 0; transition: 0.2s; }
+        .edital-item-container:hover .edital-actions { opacity: 1; }
+
+        /* PERFIL DO USUÁRIO NA BARRA LATERAL */
+        .sidebar-profile { display: flex; align-items: center; gap: 12px; padding: 15px 20px; border-top: 1px solid rgba(255,255,255,0.05); margin-top: 15px; transition: 0.3s; }
+        .profile-avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.1); flex-shrink: 0; }
+        .profile-info { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+        .profile-name { color: white; font-size: 0.9rem; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .profile-status { color: var(--success); font-size: 0.75rem; display: flex; align-items: center; gap: 4px; }
+        .profile-status::before { content: ""; width: 6px; height: 6px; background: var(--success); border-radius: 50%; display: inline-block; }
+        .btn-logout { background: none; border: none; color: rgba(255,255,255,0.5); cursor: pointer; padding: 5px; border-radius: 6px; transition: 0.2s; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .btn-logout:hover { background: rgba(235, 59, 90, 0.15); color: var(--danger); }
+        .sidebar.recolhido .sidebar-profile { padding: 15px 0; justify-content: center; border-top: none; }
+        .sidebar.recolhido .profile-info, .sidebar.recolhido .btn-logout { display: none; }
+
+        /* CONTEÚDO PRINCIPAL (Scroll Independente) */
+        .main-content { flex: 1; padding: 30px 40px; overflow-y: auto; height: 100vh; position: relative;}
+        .tab-content { display: none; animation: fadeIn 0.4s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes zoomIn { 0% { opacity: 0; transform: scale(0.96); } 100% { opacity: 1; transform: scale(1); } }
+        #ambiente-topico.active { animation: zoomIn 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+
+        .card { background: var(--card-bg); padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 20px; border: 1px solid var(--border); }
+        .card-header-flex { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--secondary); padding-bottom: 15px; margin-bottom: 20px; }
+        h3 { margin: 0; color: var(--title-color); transition: color 0.4s; font-size: 1.3rem; }
+        .btn-outline { background: transparent; border: 1px solid var(--secondary); color: var(--secondary); padding: 6px 16px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; font-weight: bold; transition: 0.2s;}
+        .btn-outline:hover { background: var(--secondary); color: white; }
+
+        /* Barras de Progresso */
+        .progress-container { margin-bottom: 20px; }
+        .progress-header { display: flex; justify-content: space-between; font-size: 1.05rem; margin-bottom: 8px; font-weight: bold;}
+        .progress-bar-bg { width: 100%; background-color: var(--progress-bg); border-radius: 8px; overflow: hidden; height: 16px;}
+        .progress-bar-fill { height: 100%; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+        .mini-bars-wrapper { display: none; flex-wrap: wrap; gap: 15px; margin-top: 15px; padding: 15px; background: rgba(0,0,0,0.02); border-radius: 8px; border: 1px solid var(--border); box-sizing: border-box; width: 100%; }
+        [data-theme="dark"] .mini-bars-wrapper { background: rgba(255,255,255,0.02); }
+        .show-minibars .mini-bars-wrapper { display: flex; animation: fadeIn 0.3s ease; }
+        .mini-bar-container { flex: 1 1 calc(50% - 15px); min-width: 200px; display: flex; flex-direction: column; gap: 5px; }
+        .mini-bar-title { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; justify-content: space-between;}
+        .mini-bar-bg { width: 100%; background: var(--progress-bg); height: 8px; border-radius: 4px; overflow: hidden;}
+        .mini-bar-fill { height: 100%; transition: width 0.5s; }
+
+        /* Aba Disciplinas */
+        .area-card { background: var(--card-bg); border: 1px solid var(--border); border-left: 5px solid var(--secondary); margin-bottom: 20px; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.02);}
+        .area-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--hover-bg); border-bottom: 1px solid var(--border); }
+        .sub-list { padding: 10px 20px 20px 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 15px; }
+        .sub-item-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; transition: 0.2s; }
+        .sub-item-card:hover { border-color: var(--secondary); transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.05); }
+        .sub-item-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;}
+        .sub-item-title { font-weight: bold; color: var(--title-color); font-size: 1.1rem; flex: 1; display: flex; align-items: center;}
+        .badge-status { font-size: 0.8rem; padding: 4px 10px; border-radius: 12px; font-weight: bold; display: inline-block;}
+        .badge-done { background: rgba(32, 191, 107, 0.1); color: var(--success); }
+        .badge-pending { background: rgba(243, 156, 18, 0.1); color: var(--accent); }
+        .btn-add-area { background: var(--secondary); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s;}
+        .btn-add-area:hover { background: #0c9c95; }
+        .btn-add-sub { margin: 0 20px 20px 20px; padding: 10px 20px; background: var(--hover-bg); color: var(--title-color); border: 1px dashed var(--border); border-radius: 6px; cursor: pointer; font-size: 0.95rem; font-weight: bold; transition: 0.2s;}
+        .btn-add-sub:hover { background: var(--border); }
+
+        /* PAINEL DE TEMPO GLOBAL */
+        .time-panel-wrapper { position: relative; display: flex; flex-direction: column; background-color: var(--sidebar-bg); border-radius: 14px; overflow: hidden; margin-bottom: 20px; min-height: 220px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .time-panel-content { position: relative; z-index: 2; padding: 25px 30px; display: flex; flex-direction: column; align-items: center; width: 100%; }
+        .time-panel-controls { width: 100%; display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+        .time-select-group { display: flex; flex-direction: column; gap: 8px; }
+        .select-modern { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white !important; border-radius: 20px; padding: 8px 16px; font-size: 0.9rem; outline: none; cursor: pointer; backdrop-filter: blur(5px); font-family: inherit; width: auto !important; }
+        .select-modern option { color: black; }
+        .btn-reset-time { background: transparent; border: 1px dashed rgba(255,255,255,0.3); color: rgba(255,255,255,0.6); border-radius: 20px; padding: 4px 12px; font-size: 0.75rem; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 5px; width: fit-content; }
+        .btn-reset-time:hover { background: rgba(235, 59, 90, 0.1); border-color: rgba(235, 59, 90, 0.5); color: #ff5252; }
+        .time-panel-main h4 { margin: 0 0 5px 0; font-size: 1.15rem; font-weight: normal; color: rgba(255,255,255,0.8);}
+        .time-huge { font-size: 4.5rem; font-weight: 200; font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-variant-numeric: tabular-nums; letter-spacing: -2px; color: white; text-shadow: 0 4px 20px rgba(0,0,0,0.2); line-height: 1; }
+        .chart-tempo-overlay { position: absolute; bottom: 0; left: 0; width: 100%; height: 75%; z-index: 1; pointer-events: none; opacity: 0.85; }
+
+        /* Tarefas e inputs */
+        .schedule-list { list-style: none; padding: 0; margin: 0; }
+        .task-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid var(--border); background: var(--card-bg); border-radius: 6px; margin-bottom: 10px; transition: 0.3s; border-left: 5px solid transparent; }
+        .task-content { display: flex; align-items: center; gap: 12px; flex: 1; }
+        .task-actions { display: flex; gap: 10px; align-items: center; }
+        input[type="text"], input[type="file"], input[type="number"], select { width: 100%; padding: 12px 15px; border: 1px solid var(--border); border-radius: 8px; background: var(--card-bg); color: var(--title-color); font-family: inherit; font-size: 1rem; transition: border 0.3s; }
+        input[type="text"]:focus, input[type="number"]:focus { border-color: var(--secondary); }
+        .time-input { width: 70px; padding: 8px; text-align: center; font-weight: bold; }
+        .btn-icon { background: none; border: none; cursor: pointer; font-size: 1.1rem; opacity: 0.6; transition: 0.3s; display: flex; align-items: center; justify-content: center;}
+        .btn-icon:hover { opacity: 1; transform: scale(1.1); }
+        .color-picker { width: 28px; height: 28px; padding: 0; border: none; border-radius: 50%; cursor: pointer; background: transparent; }
+        .color-picker::-webkit-color-swatch { border: none; border-radius: 50%; }
+
+        @keyframes pulseAlert { 0% { box-shadow: 0 0 0 0 rgba(235, 59, 90, 0.4); border-color: var(--danger); } 70% { box-shadow: 0 0 0 10px rgba(235, 59, 90, 0); border-color: var(--danger); } 100% { box-shadow: 0 0 0 0 rgba(235, 59, 90, 0); border-color: var(--danger); } }
+        .revisao-urgente { animation: pulseAlert 2s infinite !important; border-color: var(--danger) !important;}
+        .text-urgente { color: var(--danger) !important; font-weight: bold; }
+        .bg-urgente { background: var(--danger) !important; }
+
+        .btn-expand { background-color: var(--hover-bg); color: var(--title-color); border: 1px solid var(--border); padding: 12px 20px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 15px; transition: 0.2s;}
+        .weekly-schedule-modal { background: var(--hover-bg); padding: 20px; border-radius: 8px; margin-top: 10px; border: 1px dashed var(--border); }
+        .accordion-header { background-color: var(--hover-bg); color: var(--title-color); font-weight: bold; border: 1px solid var(--border); padding: 15px; width: 100%; text-align: left; cursor: pointer; border-radius: 8px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center;}
+        .accordion-content { display: none; padding: 15px; border: 1px solid var(--border); border-top: none; border-radius: 0 0 8px 8px; background: var(--card-bg); }
+        .btn-primary { background-color: var(--secondary); color: white; border: none; padding: 12px 25px; border-radius: 6px; font-size: 1rem; cursor: pointer; font-weight: bold; transition: 0.2s;}
+        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+
+        .ambiente-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; border-bottom: 2px solid var(--secondary); padding-bottom: 20px;}
+        .ambiente-title { margin: 0; font-size: 2rem; color: var(--title-color); }
+        .ambiente-area-name { font-size: 0.95rem; color: var(--text-muted); text-transform: uppercase; font-weight: bold; letter-spacing: 1px; margin-bottom: 5px;}
+        
+        /* SCROLL LISTA DE REVISÕES */
+        .amb-sugestoes-lista { max-height: 120px; overflow-y: auto; padding-right: 10px; list-style: none; margin: 0; padding-left: 0; }
+        .amb-sugestoes-lista::-webkit-scrollbar { width: 6px; }
+        .amb-sugestoes-lista::-webkit-scrollbar-thumb { background: rgba(235, 59, 90, 0.3); border-radius: 10px; }
+        .sugestao-item { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed rgba(235, 59, 90, 0.2); color: var(--text-muted); font-size: 0.95rem; line-height: 1.4;}
+        .sugestao-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0;}
+        .btn-del-sugestao { background: rgba(235, 59, 90, 0.1); color: var(--danger); border: none; border-radius: 5px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; flex-shrink: 0; margin-left: 10px; }
+        .btn-del-sugestao:hover { background: rgba(235, 59, 90, 0.2); }
+
+        /* ABA DESEMPENHO E IA */
+        .ranking-card { border: 1px solid var(--border); border-radius: 12px; padding: 25px; background: var(--card-bg); margin-bottom: 20px; border-left: 5px solid #3498db; }
+        .ranking-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px dashed var(--border); padding-bottom: 15px; }
+        .ranking-params { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; background: var(--hover-bg); padding: 20px; border-radius: 10px; }
+        .param-group { display: flex; flex-direction: column; flex: 1; min-width: 140px; }
+        .param-group label { font-size: 0.85rem; color: var(--text-muted); font-weight: bold; margin-bottom: 8px; text-transform: uppercase; }
+        .ranking-simulate-box { display: flex; gap: 15px; align-items: center; background: var(--info-bg); padding: 20px; border-radius: 10px; border: 1px solid var(--secondary); }
+        .ranking-result-box { margin-top: 20px; padding: 20px; border-radius: 10px; text-align: center; font-size: 1.2rem; display: none; animation: fadeIn 0.5s; }
+        .res-aprovado { background: rgba(32, 191, 107, 0.1); color: var(--success); border: 2px solid var(--success); }
+        .res-reprovado { background: rgba(235, 59, 90, 0.1); color: var(--danger); border: 2px solid var(--danger); }
+        
+        .ia-search-bar { display: flex; border: 2px solid var(--secondary); border-radius: 8px; overflow: hidden; margin-bottom: 30px; }
+        .ia-search-bar input { flex: 1; padding: 18px; border: none; font-size: 1.1rem; outline: none; border-radius: 0;}
+        .ia-search-bar button { background: var(--secondary); color: white; border: none; padding: 0 30px; font-weight: bold; cursor: pointer; font-size: 1.1rem; transition: 0.2s; }
+        .ia-search-bar button:hover { background: #0c9c95; }
+        .upload-area { border: 2px dashed var(--border); padding: 50px; text-align: center; border-radius: 12px; cursor: pointer; transition: 0.3s; background-color: var(--hover-bg);}
+        .upload-area:hover { border-color: var(--secondary); background: var(--info-bg);}
+        .btn-ia { background-color: #8e44ad; color: white; border: none; padding: 18px 30px; border-radius: 8px; font-size: 1.2rem; cursor: pointer; margin-top: 25px; font-weight: bold; width: 100%; transition: 0.2s;}
+        
+        #fullscreen-loader { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(12px); z-index: 99999; flex-direction: column; align-items: center; justify-content: center; }
+        .spinner { width: 80px; height: 80px; border: 6px solid rgba(255,255,255,0.1); border-top-color: var(--secondary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 25px; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .loader-text { color: #ffffff; font-size: 1.4rem; font-weight: bold; text-align: center; max-width: 80%; line-height: 1.6; }
+
+        /* ====================================================
+           INTERFACE DE FOCO E SIMULADOR
+           ==================================================== */
+        .aura-wrapper { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; overflow: hidden; z-index: -1; opacity: 0; visibility: hidden; transition: opacity 0.6s ease; }
+        body.focus-mode .aura-wrapper { opacity: 1; visibility: visible; }
+        .aura-blob { position: absolute; border-radius: 50%; filter: blur(90px); animation: spinAura 20s linear infinite; }
+        .aura-1 { width: 45vw; height: 45vw; background: rgba(142, 68, 173, 0.35); top: -10vh; left: -10vw; animation-direction: normal; }
+        .aura-2 { width: 55vw; height: 55vw; background: rgba(15, 185, 177, 0.35); bottom: -20vh; right: -10vw; animation-direction: reverse; animation-duration: 25s; }
+        .aura-3 { width: 40vw; height: 40vw; background: rgba(243, 156, 18, 0.25); top: 30vh; left: 25vw; animation-duration: 30s; }
+        @keyframes spinAura { 0% { transform: rotate(0deg) scale(1); } 50% { transform: rotate(180deg) scale(1.05); } 100% { transform: rotate(360deg) scale(1); } }
+
+        /* TELA DE LOGIN OVERLAY */
+        #login-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(10, 10, 12, 0.85); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); z-index: 99990; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 1; transition: opacity 0.5s ease; }
+        #login-overlay.hidden { opacity: 0; pointer-events: none; visibility: hidden; }
+        .login-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; padding: 50px 40px; text-align: center; max-width: 420px; width: 90%; box-shadow: 0 30px 60px rgba(0,0,0,0.5); display: flex; flex-direction: column; align-items: center; }
+        .login-title { color: white; font-size: 2.2rem; font-weight: bold; margin: 0 0 10px 0; letter-spacing: -1px; }
+        .login-subtitle { color: rgba(255,255,255,0.6); font-size: 1rem; margin-bottom: 40px; line-height: 1.5; }
+        
+        .btn-auth { width: 100%; display: flex; align-items: center; justify-content: center; gap: 12px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: white; padding: 15px; border-radius: 12px; font-size: 1.05rem; font-weight: 500; cursor: pointer; transition: all 0.2s; margin-bottom: 15px; }
+        .btn-auth:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.2); transform: translateY(-2px); }
+        .btn-auth svg { width: 24px; height: 24px; }
+
+        body.focus-mode .sidebar { width: 0; padding: 0; overflow: hidden; opacity: 0; }
+        body.focus-mode .main-content { padding: 40px 10%; display: flex; justify-content: center; align-items: center; background: transparent; }
+        body.focus-mode .tab-content { display: none !important; }
+
+        .focus-container { display: none; width: 100%; max-width: 600px; background: rgba(25, 25, 30, 0.6); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; padding: 40px; box-shadow: 0 30px 60px rgba(0,0,0,0.5); color: white; position: relative;}
+        
+        body.focus-mode .focus-container.active-focus { display: block; animation: fadeIn 0.5s ease; }
+        body.focus-mode #focus-simulador.active-focus { display: flex; } 
+
+        .btn-close-focus-modern { position: fixed; top: 40px; left: 40px; background: rgba(235, 59, 90, 0.15); color: #ff5252; border: 1px solid rgba(235, 59, 90, 0.3); padding: 12px 20px; border-radius: 12px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px; transition: 0.3s; backdrop-filter: blur(10px); z-index: 1002; opacity: 0; visibility: hidden; }
+        body.focus-mode .btn-close-focus-modern { opacity: 1; visibility: visible; }
+        .btn-close-focus-modern:hover { background: rgba(235, 59, 90, 0.3); color: #fff; transform: translateX(-2px); }
+
+        .btn-floating-tasks { position: fixed; top: 40px; right: 40px; width: 54px; height: 54px; background: rgba(40, 40, 45, 0.8); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: white; cursor: pointer; z-index: 1002; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); opacity: 0; visibility: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        body.focus-mode .btn-floating-tasks.visible { opacity: 1; visibility: visible; }
+        .btn-floating-tasks:hover { background: rgba(60, 60, 65, 0.9); transform: translateY(-2px); }
+
+        /* BOTÃO E PAINEL DO SPOTIFY */
+        .btn-floating-music { position: fixed; top: 40px; right: 110px; width: 54px; height: 54px; background: rgba(30, 215, 96, 0.15); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(30, 215, 96, 0.3); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: #1DB954; cursor: pointer; z-index: 1002; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); opacity: 0; visibility: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        body.focus-mode .btn-floating-music.visible { opacity: 1; visibility: visible; }
+        .btn-floating-music:hover { background: rgba(30, 215, 96, 0.3); color: white; transform: translateY(-2px); }
+
+        .glass-task-panel { position: fixed; top: 20px; right: 20px; width: 380px; height: calc(100vh - 40px); background: rgba(20, 20, 25, 0.85); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; z-index: 1003; display: flex; flex-direction: column; padding: 25px; transform: translateX(120%); transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.5s; opacity: 0; box-shadow: -10px 10px 40px rgba(0,0,0,0.5); color: white; }
+        .glass-task-panel.active { transform: translateX(0); opacity: 1; }
+        .glass-panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; }
+        .btn-close-glass-panel { background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
+        .btn-close-glass-panel:hover { background: rgba(255,255,255,0.15); }
+        
+        .btn-add-task-dashed { background: rgba(255, 255, 255, 0.03); border: 1px dashed rgba(255, 255, 255, 0.3); color: rgba(255, 255, 255, 0.8); padding: 15px; border-radius: 12px; cursor: pointer; font-size: 0.95rem; font-weight: bold; display: flex; align-items: center; gap: 10px; transition: 0.2s; margin-bottom: 20px; width: 100%; text-align: left; }
+        .btn-add-task-dashed:hover { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.5); color: white; }
+        .focus-task-list { list-style: none; padding: 0; margin: 0; overflow-y: auto; flex: 1; }
+        .focus-task-item { padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 0.95rem; display: flex; justify-content: space-between; align-items: center; transition: 0.2s;}
+        .focus-task-item.current { color: var(--secondary); font-weight: bold; font-size: 1.05rem;}
+        .focus-task-item:last-child { border: none; }
+
+        /* UI DO SPOTIFY */
+        .spotify-player-container { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-top: 10px; }
+        .spotify-album-art { width: 180px; height: 180px; border-radius: 12px; object-fit: cover; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .spotify-track-info { text-align: center; width: 100%; }
+        .spotify-track-name { font-size: 1.2rem; font-weight: bold; color: white; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .spotify-artist-name { font-size: 0.9rem; color: rgba(255,255,255,0.6); margin: 5px 0 0 0; }
+        .spotify-controls { display: flex; gap: 20px; align-items: center; margin-top: 10px; }
+        .btn-spotify-ctrl { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; }
+        .btn-spotify-ctrl:hover { background: rgba(255,255,255,0.1); }
+        .btn-spotify-play { width: 50px; height: 50px; background: #1DB954; color: black; border-radius: 50%; font-size: 1.5rem; display:flex; align-items:center; justify-content:center; }
+        .btn-spotify-play:hover { transform: scale(1.05); background: #1ed760; }
+        .spotify-playlists { margin-top: 10px; flex: 1; overflow-y: auto; padding-right: 5px;}
+        .playlist-item { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+        .playlist-item:hover { background: rgba(255,255,255,0.05); }
+
+        .current-task-label { text-align: center; font-size: 1.4rem; color: rgba(255,255,255,0.8); margin-bottom: 20px; font-weight: 500; letter-spacing: 1px;}
+        .circular-timer { position: relative; width: 320px; height: 320px; margin: 0 auto 30px auto; display: flex; justify-content: center; align-items: center; }
+        .circular-timer svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+        .circular-timer circle { fill: none; stroke-width: 8; stroke-linecap: round; }
+        .timer-track { stroke: rgba(255,255,255,0.05); }
+        .timer-progress { stroke: var(--secondary); stroke-dasharray: 816; stroke-dashoffset: 0; transition: stroke-dashoffset 1s linear; }
+        .timer-display-huge { font-size: 6rem; font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-weight: 200; font-variant-numeric: tabular-nums; letter-spacing: -2px; z-index: 2; margin: 0; color: #fff; line-height:1;}
+        .btn-float-main { background: linear-gradient(135deg, var(--secondary), #0c9c95); color: white; border: none; padding: 18px 60px; font-size: 1.3rem; font-weight: bold; border-radius: 50px; cursor: pointer; box-shadow: 0 10px 25px rgba(15, 185, 177, 0.4); transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); display: inline-block; }
+        .btn-float-main:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(15, 185, 177, 0.6); }
+        .btn-float-main:active { transform: translateY(2px); }
+        .btn-skip-subtle { background: transparent; border: none; color: rgba(255,255,255,0.5); padding: 10px 20px; border-radius: 30px; cursor: pointer; transition: 0.2s; margin-top: 15px; font-size: 0.95rem;}
+        .btn-skip-subtle:hover { color: white; background: rgba(255,255,255,0.1); }
+
+        /* AJUSTES NO SIMULADOR DE QUESTÕES (LIMITES E ELIMINAÇÃO) */
+        #focus-simulador { max-width: 850px; max-height: 85vh; padding: 30px; flex-direction: column; }
+        #simulador-active { overflow-y: auto; padding-right: 10px; flex: 1; margin-bottom: 10px; }
+        #simulador-active::-webkit-scrollbar { width: 6px; }
+        #simulador-active::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+
+        .sim-option-wrapper { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 10px; }
+        .btn-eliminate { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; width: 45px; height: 50px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; flex-shrink: 0; font-size: 1.1rem; }
+        .btn-eliminate:hover { background: rgba(235, 59, 90, 0.2); color: var(--danger); border-color: rgba(235, 59, 90, 0.4); }
+        .btn-eliminate.eliminated { background: rgba(235, 59, 90, 0.3); color: var(--danger); border-color: var(--danger); }
+        
+        .sim-option-btn { flex: 1; padding: 15px 20px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.9); border-radius: 8px; cursor: pointer; text-align: left; font-size: 1.05rem; transition: all 0.2s; line-height: 1.4; margin: 0; }
+        .sim-option-btn:hover:not(:disabled) { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.3); }
+        .sim-option-btn:disabled { cursor: default; }
+        .sim-option-btn.eliminated { opacity: 0.3; text-decoration: line-through; pointer-events: none; }
+        .sim-option-correct { background: rgba(32, 191, 107, 0.15) !important; border-color: var(--success) !important; color: white !important;}
+        .sim-option-wrong { background: rgba(235, 59, 90, 0.15) !important; border-color: var(--danger) !important; color: white !important; opacity: 0.6; }
+
+        @media (max-width: 768px) {
+            body:not(.focus-mode) { flex-direction: column; overflow-y: auto; }
+            .sidebar { width: 100%; flex-direction: column; height: auto; position: relative;}
+            .sidebar.recolhido { width: 100%; height: auto; }
+            .main-content { padding: 20px; height: auto;}
+            body.focus-mode .main-content { padding: 20px 5%; align-items: flex-start; margin-top: 80px;}
+            .timer-display-huge { font-size: 4.5rem; }
+            .circular-timer { width: 250px; height: 250px; }
+            .glass-task-panel { right: 10px; width: 90%; top: 10px; height: calc(100vh - 20px); }
+            .btn-close-focus-modern { top: 20px; left: 20px; padding: 10px 15px;}
+            .btn-floating-tasks { top: 20px; right: 20px; width: 45px; height: 45px;}
+            .btn-floating-music { top: 20px; right: 80px; width: 45px; height: 45px;}
+            #focus-simulador { max-height: calc(100vh - 100px); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- AURA BACKGROUND (Mantido globalmente para o fundo do App) -->
+    <div class="aura-wrapper">
+        <div class="aura-blob aura-1"></div>
+        <div class="aura-blob aura-2"></div>
+        <div class="aura-blob aura-3"></div>
+    </div>
+
+    <!-- TELA DE LOGIN OVERLAY (Z-INDEX ALTO) -->
+    <div id="login-overlay">
+        <!-- Renderiza os mesmos blobs atrás do login para manter a estética -->
+        <div class="aura-blob aura-1" style="z-index:-1; opacity: 0.6;"></div>
+        <div class="aura-blob aura-2" style="z-index:-1; opacity: 0.6;"></div>
+        
+        <div class="login-card">
+            <h1 class="login-title">Portal de Estudos</h1>
+            <p class="login-subtitle">Acesse sua conta para sincronizar seus editais, métricas e histórico de tempo.</p>
+            
+            <button class="btn-auth" onclick="simularLogin('google')">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                Continuar com Google
+            </button>
+
+            <button class="btn-auth" onclick="simularLogin('microsoft')">
+                <svg viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="1" y="11" width="9" height="9" fill="#00a4ef"/><rect x="11" y="1" width="9" height="9" fill="#7fba00"/><rect x="11" y="11" width="9" height="9" fill="#ffb900"/></svg>
+                Continuar com Microsoft
+            </button>
+        </div>
+    </div>
+
+    <!-- OVERLAY DE CARREGAMENTO -->
+    <div id="fullscreen-loader">
+        <div class="spinner"></div>
+        <div class="loader-text" id="loader-message">Aguarde...</div>
+    </div>
+
+    <!-- BARRA LATERAL FIXA -->
+    <nav class="sidebar" id="main-sidebar">
+        <div class="sidebar-header">
+            <button class="hamburger-btn" onclick="toggleSidebar()" title="Expandir/Recolher Menu">
+                <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M4 7c0-.552.448-1 1-1h14c.552 0 1 .448 1 1s-.448 1-1 1H5c-.552 0-1-.448-1-1zm0 5c0-.552.448-1 1-1h14c.552 0 1 .448 1 1s-.448 1-1 1H5c-.552 0-1-.448-1-1zm0 5c0-.552.448-1 1-1h14c.552 0 1 .448 1 1s-.448 1-1 1H5c-.552 0-1-.448-1-1z" /></svg>
+            </button>
+            <h2>Portal de Estudos</h2>
+        </div>
+
+        <button class="nav-btn active" id="btn-home" onclick="mudarAba('home', this)" title="Visão Geral">
+            <svg class="icon-svg" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            <span class="nav-btn-text">Visão Geral</span>
+        </button>
+        <button class="nav-btn" id="btn-nav-disciplinas" onclick="mudarAba('disciplinas', this)" title="Disciplinas">
+            <svg class="icon-svg" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+            <span class="nav-btn-text">Disciplinas</span>
+        </button>
+        <button class="nav-btn" onclick="mudarAba('questoes', this)" title="Questões e Status">
+            <svg class="icon-svg" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            <span class="nav-btn-text">Questões e Status</span>
+        </button>
+        <button class="nav-btn" onclick="mudarAba('desempenho', this)" title="Desempenho (Ranking)">
+            <svg class="icon-svg" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20v-6M6 20V10M18 20V4"></path></svg>
+            <span class="nav-btn-text">Desempenho</span>
+        </button>
+        
+        <div class="menu-section">
+            <div class="menu-title">Meus Editais</div>
+            <div id="lista-editais"></div>
+            
+            <div class="switch-container" style="border-top: 1px solid rgba(255,255,255,0.05); margin-top: 15px; padding-top: 15px;">
+                <label class="switch" title="Sincronizar tópicos idênticos">
+                    <input type="checkbox" id="toggle-sync" onchange="alternarSync(this.checked)">
+                    <span class="slider"></span>
+                </label>
+                <div class="switch-label">Sincronizar tópicos.</div>
+            </div>
+
+            <button class="nav-btn" onclick="criarEditalManual()" style="color: var(--success); margin-top: 10px;" title="Criar Edital Manual">
+                <svg class="icon-svg" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <span class="nav-btn-text">Criar Edital Manual</span>
+            </button>
+            <button class="nav-btn" onclick="mudarAba('ia-edital', this)" style="color: var(--accent);" title="Analisar PDF com IA">
+                <svg class="icon-svg" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"></rect><circle cx="12" cy="5" r="2"></circle><path d="M12 7v4"></path><line x1="8" y1="16" x2="8" y2="16"></line><line x1="16" y1="16" x2="16" y2="16"></line></svg>
+                <span class="nav-btn-text">Analisar PDF com IA</span>
+            </button>
+        </div>
+
+        <div style="padding: 20px 20px 0 20px; border-top: 1px solid rgba(255,255,255,0.05); margin-top: auto; flex-shrink: 0;">
+            <div class="switch-container" style="padding: 0; margin: 0;">
+                <label class="switch" title="Modo Escuro">
+                    <input type="checkbox" id="toggle-dark" onchange="alternarModoEscuro(this.checked)">
+                    <span class="slider"></span>
+                </label>
+                <div class="switch-label nav-btn-text" style="font-size: 0.95rem; font-weight: bold; color: white;">🌙 Modo Escuro</div>
+            </div>
+        </div>
+
+        <!-- PERFIL DO USUÁRIO NA BARRA LATERAL -->
+        <div class="sidebar-profile" id="sidebar-profile" style="display: none;">
+            <img id="profile-pic" src="" alt="User" class="profile-avatar">
+            <div class="profile-info">
+                <span id="profile-name" class="profile-name">Nome</span>
+                <span class="profile-status">Conectado</span>
+            </div>
+            <button class="btn-logout" onclick="fazerLogout()" title="Sair da Conta">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            </button>
+        </div>
+
+    </nav>
+
+    <!-- BOTÕES FLUTUANTES UNIVERSAIS -->
+    <button class="btn-close-focus-modern" onclick="sairModoFocoGlobal()" title="Sair do Modo Foco">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        <span>Sair</span>
+    </button>
+
+    <button id="btn-floating-music" class="btn-floating-music" onclick="toggleFocusMusic()" title="Música e Foco">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+    </button>
+
+    <button id="btn-floating-tasks" class="btn-floating-tasks" onclick="toggleFocusTasks()" title="Ver Tarefas">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="6" height="6" rx="1"></rect><path d="M14 7h7"></path><path d="M14 12h7"></path><path d="M14 17h7"></path><path d="M3 17l2 2 4-4"></path></svg>
+    </button>
+
+    <!-- PAINEL LATERAL DE TAREFAS -->
+    <div id="glass-task-panel" class="glass-task-panel">
+        <div class="glass-panel-header">
+            <button class="btn-close-glass-panel" onclick="toggleFocusTasks()" title="Esconder Tarefas">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+            <h3 style="margin: 0; color: white; font-size: 1.4rem; border:none; padding:0;">Tarefas</h3>
+            <div style="width: 36px;"></div>
+        </div>
+        <button class="btn-add-task-dashed" onclick="adicionarTarefaFocoRapida()">
+            <span style="font-size: 1.2rem;">+</span> Adicionar tarefa
+        </button>
+        <ul id="focus-task-list" class="focus-task-list"></ul>
+    </div>
+
+    <!-- PAINEL LATERAL DE MÚSICA (SPOTIFY) -->
+    <div id="glass-music-panel" class="glass-task-panel">
+        <div class="glass-panel-header">
+            <button class="btn-close-glass-panel" onclick="toggleFocusMusic()" title="Esconder Música">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+            <h3 style="margin: 0; color: white; font-size: 1.4rem; border:none; padding:0; display:flex; align-items:center; gap:8px;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="#1DB954" stroke="#1DB954" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+                Música
+            </h3>
+            <div style="width: 36px;"></div>
+        </div>
+
+        <div id="spotify-login-screen" style="text-align: center; margin-top: 50px;">
+            <p style="color: rgba(255,255,255,0.7); margin-bottom: 25px; line-height: 1.5;">Conecte sua conta do Spotify para ouvir suas playlists de foco sem sair da plataforma.</p>
+            <button class="btn-primary" style="background: #1DB954; color: black; border-radius: 50px; font-weight: bold; width: 100%; padding: 15px;" onclick="connectSpotify()">Conectar ao Spotify</button>
+        </div>
+
+        <div id="spotify-player-screen" style="display: none; flex-direction: column; height: 100%;">
+            <div class="spotify-player-container">
+                <img id="sp-album-art" src="https://via.placeholder.com/180" class="spotify-album-art">
+                <div class="spotify-track-info">
+                    <h4 id="sp-track-name" class="spotify-track-name">Carregando...</h4>
+                    <p id="sp-artist-name" class="spotify-artist-name">-</p>
+                </div>
+                <div class="spotify-controls">
+                    <button class="btn-spotify-ctrl" onclick="spotifyAction('prev')">⏮</button>
+                    <button class="btn-spotify-play" id="btn-sp-play" onclick="spotifyAction('playpause')">▶</button>
+                    <button class="btn-spotify-ctrl" onclick="spotifyAction('next')">⏭</button>
+                </div>
+            </div>
+            
+            <h4 style="margin: 25px 0 10px 0; font-size: 1.1rem; color: rgba(255,255,255,0.9); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">Suas Playlists</h4>
+            <div id="sp-playlists-container" class="spotify-playlists amb-sugestoes-lista" style="max-height: calc(100vh - 450px);">
+            </div>
+            <button class="btn-skip-subtle" style="margin-top:auto;" onclick="disconnectSpotify()">Desconectar Conta</button>
+        </div>
+    </div>
+
+    <!-- ÚNICO CONTEÚDO PRINCIPAL DA PLATAFORMA -->
+    <main class="main-content">
+
+        <!-- ABA 1: VISÃO GERAL -->
+        <section id="home" class="tab-content active">
+            <div class="card">
+                <div class="card-header-flex">
+                    <h3 id="titulo-visao-geral" style="border:none; margin:0; padding:0;">Progresso do Edital</h3>
+                    <button id="btn-toggle-progresso" onclick="toggleProgressoDetalhes()" class="btn-outline">Ver Tópicos ▼</button>
+                </div>
+                <div id="progress-bars-container"></div>
+            </div>
+
+            <div class="time-panel-wrapper">
+                <canvas id="chart-tempo-overlay" class="chart-tempo-overlay"></canvas>
+                <div class="time-panel-content">
+                    <div class="time-panel-controls">
+                        <div class="time-select-group">
+                            <select id="select-escala-tempo" class="select-modern" onchange="mudarEscalaTempo(this.value)">
+                                <option value="dia">Hoje</option>
+                                <option value="semana" selected>Nesta Semana</option>
+                                <option value="mes">Neste Mês</option>
+                            </select>
+                            <button class="btn-reset-time" onclick="resetarTempoEstudado()" title="Zerar o tempo da escala selecionada">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.13 15.57a10 10 0 1 0 3.43-11.45L2 8"></path></svg>
+                                Resetar
+                            </button>
+                        </div>
+                        <div class="switch-container" style="margin: 0; padding: 0;">
+                            <div class="switch-label" style="color: white; font-weight: bold; margin-right: 8px;">Gráfico</div>
+                            <label class="switch" title="Mostrar Gráfico">
+                                <input type="checkbox" id="toggle-grafico-tempo" onchange="alternarGraficoTempo(this.checked)" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="time-panel-main" style="padding:0; text-align:center;">
+                        <h4 id="label-tempo-global">Tempo Estudado na Semana</h4>
+                        <div class="time-huge" id="display-tempo-global">00h 00m 00s</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header-flex"><h3 style="border:none; margin:0; padding:0;">Cronograma do Dia</h3></div>
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <input type="text" id="input-dia-home" placeholder="Nova tarefa para hoje..." style="flex: 1;" onkeydown="if(event.key==='Enter') adicionarTarefaDiariaGlobal('input-dia-home')">
+                    <button class="btn-primary" onclick="adicionarTarefaDiariaGlobal('input-dia-home')">Adicionar</button>
+                </div>
+                <ul class="schedule-list" id="container-tarefas-hoje"></ul>
+                <button class="btn-expand" onclick="toggleWeeklySchedule()">Ver Cronograma da Semana ▼</button>
+                <div id="weekly-schedule-container" style="display: none;"></div>
+            </div>
+        </section>
+
+        <!-- ABA 2: DISCIPLINAS -->
+        <section id="disciplinas" class="tab-content">
+            <div class="card" style="background: transparent; box-shadow: none; border: none; padding: 0;">
+                <div class="card-header-flex" style="border-bottom: none; margin-bottom: 10px;">
+                    <h3 style="border:none; padding:0; font-size:1.8rem;">Disciplinas e Tópicos</h3>
+                    <button class="btn-primary" onclick="adicionarAreaManual()">+ Nova Área</button>
+                </div>
+                <div id="disciplinas-container"></div>
+            </div>
+        </section>
+
+        <!-- ABA 2.1: AMBIENTE DA DISCIPLINA -->
+        <section id="ambiente-topico" class="tab-content">
+            <button onclick="fecharAmbienteTopico()" style="background:none; border:none; color:var(--text-muted); font-weight:bold; cursor:pointer; margin-bottom: 15px; font-size: 1rem; display:flex; align-items:center; gap:5px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                Voltar para Disciplinas
+            </button>
+            <div class="ambiente-header">
+                <div>
+                    <div class="ambiente-area-name" id="amb-area-name">Área de Conhecimento</div>
+                    <h2 class="ambiente-title" id="amb-sub-name">Nome do Tópico</h2>
+                </div>
+                <button id="btn-toggle-concluido" class="btn-primary" style="background: var(--success);" onclick="alternarConclusaoTopicoAtual()">Marcar como Concluído ✅</button>
+            </div>
+
+            <!-- BLOCO DE REVISÃO -->
+            <div class="card" id="card-revisao-espacada" style="border: 1px solid var(--border); border-left: 5px solid var(--accent);">
+                <h3 style="color: var(--accent); margin-bottom: 15px; border-bottom: 1px solid var(--border);">⏰ Revisão Espaçada e Inteligente</h3>
+                <div style="background: rgba(235, 59, 90, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <h4 style="margin: 0 0 10px 0; color: var(--danger);">🎯 Foco de Revisão (Baseado em erros do tópico)</h4>
+                    <ul class="amb-sugestoes-lista" id="amb-sugestoes-erros-lista"></ul>
+                </div>
+                <div>
+                    <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 0;">Defina o prazo ou a frequência temporal para revisar este assunto:</p>
+                    <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 15px; flex-wrap: wrap;" id="setup-revisao-container">
+                        <input type="number" id="input-tempo-revisao" placeholder="Qtd." style="width: 80px;" onkeydown="if(event.key==='Enter') iniciarCicloTemporalRevisao()">
+                        <select id="select-unidade-revisao" style="width: auto; font-weight:bold; color:var(--title-color);">
+                            <option value="dias">Dias</option>
+                            <option value="horas">Horas</option>
+                            <option value="minutos">Minutos</option>
+                            <option value="segundos">Segundos</option>
+                        </select>
+                        <button class="btn-primary" style="padding: 12px 15px; background: var(--accent);" onclick="iniciarCicloTemporalRevisao()">Ativar Relógio</button>
+                    </div>
+                    <div id="barra-revisao-container" style="display: none; padding-top: 15px; border-top: 1px dashed var(--border);">
+                        <div class="progress-header">
+                            <span id="texto-status-revisao" style="font-weight: bold; color: var(--title-color);">Progresso do Relógio</span>
+                            <span id="pct-barra-revisao" style="font-weight: bold; font-family: monospace; font-size: 1.1rem; color: var(--title-color);">0%</span>
+                        </div>
+                        <div class="progress-bar-bg" style="height: 18px; border-radius: 10px;">
+                            <div id="fill-barra-revisao" class="progress-bar-fill" style="width: 0%; background: var(--accent); border-radius: 10px;"></div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
+                            <span id="texto-alerta-revisao" style="font-size: 0.85rem; color: var(--text-muted); font-weight:bold;"></span>
+                            <div style="display:flex; gap:10px;">
+                                <button class="btn-icon" style="font-size: 0.9rem;" onclick="cancelarCicloRevisao()" title="Cancelar Relógio">🛑 Parar</button>
+                                <button class="btn-primary" style="padding: 6px 15px; background: var(--success); font-size: 0.9rem;" onclick="resetarCicloRevisao()">✅ Concluir (Reiniciar Ciclo)</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="border: 1px solid var(--border); border-left: 5px solid var(--success);">
+                <h3 style="border-bottom: 1px solid var(--border);">Passo a Passo (Minitarefas)</h3>
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <input type="text" id="input-minitarefa-amb" placeholder="Ex: Ler PDF Teórico..." style="flex: 1;" onkeydown="if(event.key==='Enter') adicionarMinitarefaAtual()">
+                    <button class="btn-primary" style="background: var(--success);" onclick="adicionarMinitarefaAtual()">Adicionar Passo</button>
+                </div>
+                <ul class="schedule-list" id="amb-minitarefas-lista"></ul>
+            </div>
+
+            <div class="card" style="border: 1px solid var(--border);">
+                <h3 style="border-bottom: 1px solid var(--border);">Cronograma do Dia (Exportado)</h3>
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <input type="text" id="input-dia-amb" placeholder="Nova tarefa..." style="flex: 1;" onkeydown="if(event.key==='Enter') adicionarTarefaDiariaGlobal('input-dia-amb', 'input-tempo-amb')">
+                    <input type="number" id="input-tempo-amb" placeholder="Min" style="width: 80px;">
+                    <button class="btn-primary" onclick="adicionarTarefaDiariaGlobal('input-dia-amb', 'input-tempo-amb')">Add</button>
+                </div>
+                <ul class="schedule-list" id="amb-tarefas-lista"></ul>
+            </div>
+
+            <div class="card" style="text-align: center; background: var(--hover-bg); border: 2px dashed var(--border);">
+                <h3 style="border-bottom: none;">Rotina de Estudos</h3>
+                <button class="btn-primary" style="font-size: 1.2rem; padding: 15px 40px; margin-top: 10px;" onclick="iniciarFocusTimer()">⏱️ Iniciar Rotina de Foco</button>
+            </div>
+        </section>
+
+        <!-- ABA 3: QUESTÕES E STATUS -->
+        <section id="questoes" class="tab-content">
+            <div class="card" style="text-align: center;">
+                <h3 style="border-bottom: 2px solid var(--secondary); padding-bottom: 10px;">Desempenho Global</h3>
+                <div style="width: 100%; max-width: 320px; margin: 0 auto;">
+                    <canvas id="graficoPizza"></canvas>
+                </div>
+            </div>
+            <div class="card" style="background: var(--hover-bg); border: 2px dashed var(--border);">
+                <h3 style="border-bottom: none; margin-bottom:10px;">Simulador de Questões (IA Bancas)</h3>
+                <p style="font-size:0.9rem; color:var(--text-muted); margin-top:0; margin-bottom:15px;">Selecione o tópico e deixe a IA formular questões com rigor técnico.</p>
+                
+                <select id="select-disciplina-simulado" style="margin-bottom: 20px; font-weight:bold;"></select>
+                
+                <div style="background: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 20px; text-align:left;">
+                    <label style="font-weight:bold; color:var(--title-color); display:block; margin-bottom:10px;">Modo de Geração:</label>
+                    <div style="display:flex; gap: 15px; align-items:center;">
+                        <label style="color:var(--text-muted); font-size:0.95rem; display:flex; align-items:center; gap:5px; cursor:pointer;">
+                            <input type="radio" name="sim-modo" value="mix" checked> Mesclar Inéditas e Salvas
+                        </label>
+                        <label style="color:var(--text-muted); font-size:0.95rem; display:flex; align-items:center; gap:5px; cursor:pointer;">
+                            <input type="radio" name="sim-modo" value="saved"> Apenas Já Geradas
+                        </label>
+                    </div>
+                </div>
+                <button class="btn-primary" style="width: 100%; font-size: 1.1rem; padding: 15px;" onclick="iniciarFocusSimulador()">Iniciar Resolução 🚀</button>
+            </div>
+        </section>
+
+        <!-- ABA 5: DESEMPENHO -->
+        <section id="desempenho" class="tab-content">
+            <div class="card">
+                <h3 style="border:none; padding:0; margin-bottom: 5px;">Calculadora de Ranking por Edital (IA)</h3>
+                <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 0; margin-bottom: 20px;">Busque o concurso que deseja analisar. O sistema irá vasculhar a web para cruzar com a lista de aprovados.</p>
+                <div class="ia-search-bar">
+                    <input type="text" id="input-busca-concurso" placeholder="Qual concurso analisar? (Ex: Pref. Petrolina 2026)" onkeydown="if(event.key==='Enter') buscarConcursoWeb()">
+                    <button onclick="buscarConcursoWeb()">Buscar Dados e Regras 🤖</button>
+                </div>
+                <div id="loader-ranking" class="loader" style="display: none; text-align: center; margin-top: 20px; font-weight: bold; color: #8e44ad;"><span style="font-size:2rem;">🌐</span><br>Lendo Edital e extraindo pesos...</div>
+                <div id="resultado-busca-ia"></div>
+            </div>
+        </section>
+
+        <!-- ABA 4: IA EDITAL -->
+        <section id="ia-edital" class="tab-content">
+            <div class="card">
+                <h3>Gerador Automático de Cronograma (IA)</h3>
+                <div style="background: var(--info-bg); padding: 15px; border-radius: 8px; border-left: 4px solid var(--secondary); margin-bottom: 20px; color: var(--title-color); line-height: 1.5;">
+                    <p style="margin-top: 0;"><strong>Atenção:</strong> A nossa Inteligência Artificial fará a leitura do seu edital e criará a estrutura das disciplinas e tópicos de forma automática.</p>
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label for="inputCargo-ia" style="display:block; font-weight:bold; margin-bottom:8px; color:var(--title-color);">Para qual cargo você vai prestar?</label>
+                    <input type="text" id="inputCargo-ia" placeholder="Ex: Professor Básico 3 – Geografia" required>
+                </div>
+                <div class="upload-area" id="upload-box" onclick="document.getElementById('file-input').click()">
+                    <h2 style="margin:0; color: var(--title-color);">📄 Clique para anexar o Edital (PDF)</h2>
+                    <input type="file" id="file-input" style="display: none;" accept="application/pdf" onchange="arquivoSelecionado()">
+                </div>
+                <p id="file-name" style="text-align: center; font-weight: bold; color: var(--secondary); margin-top: 10px;"></p>
+                <button class="btn-ia" id="btn-gerar" onclick="analisarPDFReal()" style="display: none;">Analisar Edital e Criar Disciplinas</button>
+            </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- CONTAINERS DE MODO FOCO (DE VOLTA PARA O MAIN) -->
+        <!-- ============================================== -->
+        
+        <!-- 1. CRONÔMETRO -->
+        <div id="focus-timer" class="focus-container" style="text-align: center;">
+            <div class="current-task-label" id="timer-task-name">Preparando...</div>
+            <div class="circular-timer">
+                <svg viewBox="0 0 300 300">
+                    <circle class="timer-track" cx="150" cy="150" r="130"></circle>
+                    <circle class="timer-progress" cx="150" cy="150" r="130"></circle>
+                </svg>
+                <div class="timer-display-huge" id="timer-display">00:00</div>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center;">
+                <button class="btn-float-main" id="btn-main-play" onclick="togglePlayPauseTimer()">Começar</button>
+                <button class="btn-skip-subtle" onclick="nextTimerTask()">⏭ Pular Tarefa</button>
+            </div>
+        </div>
+
+        <!-- 2. SIMULADOR INTELIGENTE DE QUESTÕES -->
+        <div id="focus-simulador" class="focus-container">
+            <div class="focus-header" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <span style="font-size: 0.85rem; color: var(--secondary); font-weight: bold; text-transform: uppercase; letter-spacing: 1px;" id="sim-info-disciplina">SIMULADO: DISCIPLINA</span>
+                    <h3 id="focus-sim-title" style="margin: 5px 0 0 0; font-size: 1.6rem; color: white; border:none; padding:0;">Tópico Selecionado</h3>
+                </div>
+                <div style="text-align: right;">
+                    <span id="sim-counter-status" style="background: rgba(255, 255, 255, 0.1); color: white; padding: 5px 12px; border-radius: 12px; font-size: 0.85rem; font-weight: bold; opacity:0; transition:0.3s; border: 1px solid rgba(255,255,255,0.2);">0 respondidas</span>
+                </div>
+            </div>
+
+            <!-- Loader Interno -->
+            <div id="simulador-loading-inline" style="display: none; text-align: center; padding: 50px 0;">
+                <div class="spinner" style="width: 50px; height: 50px; margin: 0 auto 20px auto;"></div>
+                <p style="color: var(--secondary); font-size: 1.2rem; font-weight: bold;">A Banca (IA) está formulando as próximas questões...</p>
+                <p style="color: rgba(255,255,255,0.5); font-size: 0.9rem;">Aplicando rigor técnico máximo. Aguarde um instante.</p>
+            </div>
+
+            <!-- Fim do Simulado Salvo -->
+            <div id="simulador-end-screen" style="display: none; text-align: center; padding: 40px 0;">
+                <h2 style="color: white; font-size: 2rem; margin-bottom: 10px;">🎉 Simulado Concluído!</h2>
+                <p style="color: rgba(255,255,255,0.7); font-size: 1.1rem; margin-bottom: 30px;">Você respondeu todas as questões salvas para este tópico.</p>
+                <button onclick="reiniciarSimuladoSalvo()" class="btn-primary" style="font-size: 1.1rem; padding: 15px 30px; border-radius: 50px; margin-bottom: 15px;">Reiniciar Questões 🔄</button>
+                <br>
+                <button onclick="sairModoFocoGlobal()" class="btn-skip-subtle">Sair do Modo Foco</button>
+            </div>
+
+            <div id="simulador-active">
+                <p id="focus-sim-enunciado" style="font-size: 1.15rem; line-height: 1.6; margin-bottom: 25px; color: white; text-align: justify;">Carregando questão...</p>
+                
+                <div id="focus-sim-options" style="display: flex; flex-direction: column;">
+                    <!-- Botões Injetados via JS -->
+                </div>
+
+                <div id="focus-sim-feedback" style="display: none; margin-top: 25px; padding: 20px; border-radius: 12px; border-left: 5px solid transparent; background: rgba(255,255,255,0.05);">
+                    <h4 id="feedback-title" style="margin: 0 0 10px 0; font-size: 1.2rem;">Resultado</h4>
+                    <p id="feedback-text" style="margin: 0; color: rgba(255,255,255,0.8); font-size: 0.95rem; line-height: 1.5;"></p>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 25px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+                    <button id="btn-pular-questao" class="btn-skip-subtle" style="margin: 0;" onclick="pularQuestaoSimulador()">Pular Questão ⏭</button>
+                    <button id="btn-proxima-questao" class="btn-primary" style="display: none; padding: 12px 30px; font-size: 1.1rem; border-radius: 50px;" onclick="proximaQuestaoSimulador()">Próxima Questão ➔</button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // --- MOTOR DE EDIÇÃO E UTILITÁRIOS ---
+        function makeInlineEditable(element, currentValue, onSaveCallback) {
+            if (element.tagName === 'INPUT') return; 
+            const input = document.createElement('input');
+            input.type = 'text'; input.className = 'inline-edit-input'; input.value = currentValue;
+            element.replaceWith(input); input.focus(); input.select(); 
+            let saved = false;
+            const save = () => { if (saved) return; saved = true; const newVal = input.value.trim(); onSaveCallback(newVal !== '' ? newVal : currentValue); };
+            input.addEventListener('blur', save);
+            input.addEventListener('keydown', (e) => { if (e.key === 'Enter') save(); if (e.key === 'Escape') { saved = true; onSaveCallback(currentValue); } });
+        }
+
+        function getDataStringLocal() {
+            const d = new Date(); const offset = d.getTimezoneOffset() * 60000;
+            return new Date(d.getTime() - offset).toISOString().split('T')[0];
+        }
+
+        function getUltimosDias(qtd) {
+            let dias = [];
+            for (let i = qtd - 1; i >= 0; i--) {
+                let d = new Date(); d.setDate(d.getDate() - i);
+                const offset = d.getTimezoneOffset() * 60000;
+                dias.push(new Date(d.getTime() - offset).toISOString().split('T')[0]);
+            }
+            return dias;
+        }
+
+        // --- ESTADO GLOBAL ---
+        let bancoDeEditais = {};
+        let ordemEditais = []; let editalAtualId = null;
+        let historicoTempo = {}; let escalaTempo = 'semana'; let mostrarGraficoTempo = true; let chartTempoInstancia = null;
+        let tempoGlobalEstudadoSegundos = 0; let tarefasDoDia = []; let bancoDeRankings = []; 
+        let topicoAtivoAId = null; let topicoAtivoSId = null; let dragStartIndex = -1; let syncAtivo = false; 
+        let bancoQuestoesLocal = {};
+
+        // --- SANITIZAÇÃO (AUTO-REPARO) ---
+        function sanitizeData() {
+            if (!bancoDeEditais || typeof bancoDeEditais !== 'object') bancoDeEditais = {};
+            if (!Array.isArray(ordemEditais)) ordemEditais = [];
+            Object.keys(bancoDeEditais).forEach(key => { if (!ordemEditais.includes(key)) ordemEditais.push(key); });
+            ordemEditais = ordemEditais.filter(id => bancoDeEditais[id] != null && typeof bancoDeEditais[id] === 'object');
+
+            if (ordemEditais.length === 0) {
+                const defaultId = 'edital-' + Date.now();
+                bancoDeEditais[defaultId] = { nome: "Meu Primeiro Edital", areas: [] };
+                ordemEditais.push(defaultId);
+            }
+            if (!editalAtualId || editalAtualId === "null" || !bancoDeEditais[editalAtualId]) { editalAtualId = ordemEditais[0]; }
+
+            ordemEditais.forEach(id => {
+                const edital = bancoDeEditais[id];
+                if (!edital.nome) edital.nome = "Edital " + id;
+                if (!edital.areas || !Array.isArray(edital.areas)) edital.areas = [];
+                edital.areas = edital.areas.filter(a => a != null && typeof a === 'object');
+                edital.areas.forEach(area => {
+                    if (!area.id) area.id = 'a' + Date.now() + Math.random();
+                    if (!area.nome) area.nome = "Nova Área";
+                    if (!area.cor) area.cor = "#0fb9b1";
+                    if (!area.sub || !Array.isArray(area.sub)) area.sub = [];
+                    area.sub = area.sub.filter(s => s != null && typeof s === 'object');
+                    area.sub.forEach(sub => {
+                        if (!sub.id) sub.id = 's' + Date.now() + Math.random();
+                        if (!sub.nome) sub.nome = "Novo Tópico";
+                        if (!sub.miniTarefas || !Array.isArray(sub.miniTarefas)) sub.miniTarefas = [];
+                        sub.miniTarefas = sub.miniTarefas.filter(m => m != null && typeof m === 'object');
+                        if (sub.acertos === undefined || sub.acertos === null) sub.acertos = 0;
+                        if (sub.erros === undefined || sub.erros === null) sub.erros = 0;
+                        if (sub.concluido === undefined || sub.concluido === null) sub.concluido = false;
+                        if (!sub.detalhesErros || !Array.isArray(sub.detalhesErros)) sub.detalhesErros = [];
+                    });
+                });
+            });
+
+            if (tempoGlobalEstudadoSegundos > 0 && (!historicoTempo || Object.keys(historicoTempo).length === 0)) {
+                historicoTempo = {};
+                historicoTempo[getDataStringLocal()] = tempoGlobalEstudadoSegundos;
+            }
+        }
+
+        // --- SISTEMA DE SALVAMENTO ---
+        function salvarDadosLocais() {
+            try {
+                localStorage.setItem('estudos_bancoDeEditais', JSON.stringify(bancoDeEditais));
+                localStorage.setItem('estudos_ordemEditais', JSON.stringify(ordemEditais));
+                localStorage.setItem('estudos_editalAtualId', editalAtualId);
+                localStorage.setItem('estudos_historicoTempo', JSON.stringify(historicoTempo));
+                localStorage.setItem('estudos_escalaTempo', escalaTempo);
+                localStorage.setItem('estudos_mostrarGraficoTempo', mostrarGraficoTempo);
+                localStorage.setItem('estudos_tarefasDoDia', JSON.stringify(tarefasDoDia));
+                localStorage.setItem('estudos_bancoDeRankings', JSON.stringify(bancoDeRankings));
+                localStorage.setItem('estudos_bancoQuestoes', JSON.stringify(bancoQuestoesLocal));
+                sincronizarComBackend(); 
+            } catch(e) {}
+        }
+
+        async function sincronizarComBackend() {
+            const edital = bancoDeEditais[editalAtualId]; if (!edital) return;
+            const payload = { editalId: editalAtualId, nome: edital.nome, areas: edital.areas };
+            try { await fetch('http://localhost:3000/api/editais', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); } catch(err) {}
+        }
+
+        function carregarDadosLocais() {
+            if (localStorage.getItem('estudos_bancoDeEditais')) {
+                try {
+                    bancoDeEditais = JSON.parse(localStorage.getItem('estudos_bancoDeEditais')); 
+                    ordemEditais = JSON.parse(localStorage.getItem('estudos_ordemEditais')); 
+                    editalAtualId = localStorage.getItem('estudos_editalAtualId');
+                    historicoTempo = JSON.parse(localStorage.getItem('estudos_historicoTempo')) || {};
+                    escalaTempo = localStorage.getItem('estudos_escalaTempo') || 'semana';
+                    mostrarGraficoTempo = localStorage.getItem('estudos_mostrarGraficoTempo') !== 'false';
+                    tempoGlobalEstudadoSegundos = parseInt(localStorage.getItem('estudos_tempoGlobal')) || 0; 
+                    tarefasDoDia = JSON.parse(localStorage.getItem('estudos_tarefasDoDia')) || []; 
+                    bancoDeRankings = JSON.parse(localStorage.getItem('estudos_bancoDeRankings')) || [];
+                    bancoQuestoesLocal = JSON.parse(localStorage.getItem('estudos_bancoQuestoes')) || {};
+                } catch(e) {}
+            }
+        }
+
+        // --- INTEGRAÇÃO DE LOGIN E PERFIL (MOCK PARA PREPARO DE PUBLICAÇÃO) ---
+        function checkLogin() {
+            const user = localStorage.getItem('estudos_user');
+            const loginScreen = document.getElementById('login-overlay');
+            const profileArea = document.getElementById('sidebar-profile');
+            
+            if(user) {
+                const userData = JSON.parse(user);
+                loginScreen.classList.add('hidden');
+                profileArea.style.display = 'flex';
+                document.getElementById('profile-name').innerText = userData.name;
+                document.getElementById('profile-pic').src = userData.photo;
+            } else {
+                loginScreen.classList.remove('hidden');
+                profileArea.style.display = 'none';
+            }
+        }
+
+        function simularLogin(provider) {
+            const btn = event.currentTarget;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<div class="spinner" style="width:20px; height:20px; border-width:3px; margin:0 auto;"></div>';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                const fakeUser = {
+                    name: "Estudante Focado",
+                    photo: "https://ui-avatars.com/api/?name=Estudante+Focado&background=0fb9b1&color=fff&rounded=true&bold=true",
+                    provider: provider
+                };
+                localStorage.setItem('estudos_user', JSON.stringify(fakeUser));
+                checkLogin();
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }, 1500);
+        }
+
+        function fazerLogout() {
+            localStorage.removeItem('estudos_user');
+            checkLogin();
+        }
+
+        // --- INTEGRAÇÃO SPOTIFY ---
+        let spotifyAccessToken = null;
+        let isSpotifyPlaying = false;
+        let spotifyInterval = null;
+
+        function checkSpotifyAuth() {
+            const hash = window.location.hash;
+            if (hash && hash.includes('access_token')) {
+                const params = new URLSearchParams(hash.substring(1));
+                spotifyAccessToken = params.get('access_token');
+                localStorage.setItem('spotify_access_token', spotifyAccessToken);
+                window.history.replaceState(null, null, ' '); 
+                document.getElementById('btn-floating-music').click(); 
+            }
+            
+            const savedToken = localStorage.getItem('spotify_access_token');
+            if (savedToken) {
+                if(savedToken === 'mock_token') { iniciarSpotifyMock(); return; }
+                spotifyAccessToken = savedToken;
+                document.getElementById('spotify-login-screen').style.display = 'none';
+                document.getElementById('spotify-player-screen').style.display = 'flex';
+                fetchSpotifyData();
+            }
+        }
+
+        function connectSpotify() {
+            const clientId = 'COLOQUE_SEU_CLIENT_ID_AQUI'; 
+            if(clientId === 'COLOQUE_SEU_CLIENT_ID_AQUI') { iniciarSpotifyMock(); return; }
+            const redirectUri = window.location.href.split('#')[0];
+            const scopes = 'user-read-playback-state user-modify-playback-state playlist-read-private user-read-private';
+            window.location.href = `https://accounts.spotify.com/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scopes)}&response_type=token&show_dialog=true`;
+        }
+
+        function disconnectSpotify() {
+            localStorage.removeItem('spotify_access_token'); spotifyAccessToken = null;
+            if(spotifyInterval) clearInterval(spotifyInterval);
+            document.getElementById('spotify-login-screen').style.display = 'block'; document.getElementById('spotify-player-screen').style.display = 'none';
+        }
+
+        async function fetchSpotifyData() {
+            try {
+                const res = await fetch('https://api.spotify.com/v1/me/playlists?limit=10', { headers: { Authorization: `Bearer ${spotifyAccessToken}` } });
+                if(!res.ok) throw new Error('Token expirado');
+                const data = await res.json();
+                
+                const list = document.getElementById('sp-playlists-container'); list.innerHTML = '';
+                data.items.forEach(pl => {
+                    const imgUrl = pl.images && pl.images.length > 0 ? pl.images[0].url : 'https://via.placeholder.com/40';
+                    list.innerHTML += `<div class="playlist-item" onclick="playSpotifyUri('${pl.uri}')"><img src="${imgUrl}" style="width:40px; height:40px; border-radius:4px; object-fit:cover;"><span style="color:white; font-weight:bold; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${pl.name}</span><span style="color:#1DB954; font-size:1.2rem;">▶</span></div>`;
+                });
+
+                if(spotifyInterval) clearInterval(spotifyInterval);
+                spotifyInterval = setInterval(checkCurrentTrack, 3000);
+                checkCurrentTrack();
+            } catch(e) { disconnectSpotify(); }
+        }
+
+        async function checkCurrentTrack() {
+            if(!spotifyAccessToken || spotifyAccessToken === 'mock_token') return;
+            try {
+                const res = await fetch('https://api.spotify.com/v1/me/player/currently-playing', { headers: { Authorization: `Bearer ${spotifyAccessToken}` } });
+                if(res.status === 204 || !res.ok) return; 
+                const data = await res.json();
+                if(data && data.item) {
+                    isSpotifyPlaying = data.is_playing;
+                    document.getElementById('btn-sp-play').innerText = isSpotifyPlaying ? "⏸" : "▶";
+                    document.getElementById('sp-track-name').innerText = data.item.name;
+                    document.getElementById('sp-artist-name').innerText = data.item.artists.map(a => a.name).join(', ');
+                    if(data.item.album && data.item.album.images.length > 0) { document.getElementById('sp-album-art').src = data.item.album.images[0].url; }
+                }
+            } catch(e) {}
+        }
+
+        async function spotifyAction(action) {
+            if(spotifyAccessToken === 'mock_token') {
+                if(action === 'playpause') {
+                    isSpotifyPlaying = !isSpotifyPlaying;
+                    document.getElementById('btn-sp-play').innerText = isSpotifyPlaying ? "⏸" : "▶";
+                }
+                return;
+            }
+
+            let endpoint = ''; let method = 'POST';
+            if(action === 'playpause') { endpoint = isSpotifyPlaying ? 'pause' : 'play'; method = 'PUT'; } 
+            else { endpoint = action === 'next' ? 'next' : 'previous'; }
+
+            try { await fetch(`https://api.spotify.com/v1/me/player/${endpoint}`, { method: method, headers: { Authorization: `Bearer ${spotifyAccessToken}` } }); setTimeout(checkCurrentTrack, 500); } catch(e) {}
+        }
+
+        async function playSpotifyUri(uri) {
+            if(spotifyAccessToken === 'mock_token') return;
+            try { await fetch(`https://api.spotify.com/v1/me/player/play`, { method: 'PUT', headers: { Authorization: `Bearer ${spotifyAccessToken}` }, body: JSON.stringify({ context_uri: uri }) }); setTimeout(checkCurrentTrack, 1000); } catch(e) {}
+        }
+
+        function iniciarSpotifyMock() {
+            localStorage.setItem('spotify_access_token', 'mock_token'); spotifyAccessToken = 'mock_token';
+            document.getElementById('spotify-login-screen').style.display = 'none'; document.getElementById('spotify-player-screen').style.display = 'flex';
+            document.getElementById('sp-album-art').src = "https://i.scdn.co/image/ab67616d0000b273410a514d1dae330a138bb3af";
+            document.getElementById('sp-track-name').innerText = "Lo-Fi Beats (Modo Demo)"; document.getElementById('sp-artist-name').innerText = "Focus Music"; document.getElementById('btn-sp-play').innerText = "▶"; isSpotifyPlaying = false;
+            
+            const list = document.getElementById('sp-playlists-container');
+            list.innerHTML = `<div class="playlist-item" onclick="spotifyAction('playpause')"><img src="https://i.scdn.co/image/ab67706f000000021ce59e13b8602b9eeb2bc300" style="width:40px; height:40px; border-radius:4px; object-fit:cover;"><span style="color:white; font-weight:bold; flex:1;">Foco Profundo</span><span style="color:#1DB954; font-size:1.2rem;">▶</span></div><div class="playlist-item" onclick="spotifyAction('playpause')"><img src="https://i.scdn.co/image/ab67706f000000025ea6156eebf230cc9e083c9a" style="width:40px; height:40px; border-radius:4px; object-fit:cover;"><span style="color:white; font-weight:bold; flex:1;">Sons da Natureza</span><span style="color:#1DB954; font-size:1.2rem;">▶</span></div>`;
+        }
+
+        // --- INICIALIZAÇÃO BLINDADA ---
+        function inicializarPlataforma() {
+            try { checkLogin(); } catch(e) {}
+            try { carregarDadosLocais(); } catch(e) {}
+            try { sanitizeData(); } catch(e) {}
+
+            try {
+                if(localStorage.getItem('estudos_modoEscuro') === 'true') { document.getElementById('toggle-dark').checked = true; document.body.setAttribute('data-theme', 'dark'); }
+                if(localStorage.getItem('estudos_sync') === 'true') { syncAtivo = true; document.getElementById('toggle-sync').checked = true; }
+            } catch(e) {}
+
+            try {
+                const diasIds = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'];
+                const nomesDiasDict = {'domingo':'Domingo', 'segunda':'Segunda-feira', 'terca':'Terça-feira', 'quarta':'Quarta-feira', 'quinta':'Quinta-feira', 'sexta':'Sexta-feira', 'sabado':'Sábado'};
+                const weeklyContent = document.getElementById('weekly-schedule-container');
+                if (weeklyContent) {
+                    let html = '';
+                    diasIds.forEach(dia => { html += `<button class="accordion-header" onclick="toggleAccordion(this)">${nomesDiasDict[dia]} <span>▼</span></button><div class="accordion-content" id="content-${dia}"><ul class="schedule-list" id="lista-${dia}"></ul><div class="add-mini" style="display:flex; gap:10px; margin-top:10px;"><input type="text" id="input-${dia}" placeholder="Nova tarefa..." style="flex:1;" onkeydown="if(event.key==='Enter') adicionarTarefaSemana('${dia}')"><button class="btn-primary" style="padding: 8px 15px;" onclick="adicionarTarefaSemana('${dia}')">Add</button></div></div>`; });
+                    weeklyContent.innerHTML = html;
+                }
+                window.diaAtualId = diasIds[new Date().getDay()];
+                const titDia = document.getElementById('titulo-dia');
+                if(titDia) titDia.innerText = `Cronograma do Dia (${nomesDiasDict[window.diaAtualId]})`;
+                const containerHoje = document.getElementById('container-tarefas-hoje');
+                const listaHoje = document.getElementById(`lista-${window.diaAtualId}`);
+                if (containerHoje && listaHoje) { containerHoje.appendChild(listaHoje); }
+            } catch(e) {}
+
+            try {
+                const elemSelect = document.getElementById('select-escala-tempo');
+                const elemToggle = document.getElementById('toggle-grafico-tempo');
+                const elemChart = document.getElementById('chart-tempo-overlay');
+                if(elemSelect) elemSelect.value = escalaTempo;
+                if(elemToggle) elemToggle.checked = mostrarGraficoTempo;
+                if(elemChart) elemChart.style.display = mostrarGraficoTempo ? 'block' : 'none';
+
+                atualizarDisplayTempoGlobal(); 
+                renderizarGraficoTempoOverlay();
+            } catch(e) {}
+
+            try { renderizarMenuEditais(); selecionarEdital(editalAtualId); renderizarTarefasDiaGlobais(); } catch(e) {}
+            try { checkSpotifyAuth(); } catch(e) {}
+        }
+
+        if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', inicializarPlataforma); } else { inicializarPlataforma(); }
+
+        // --- PAINEL DE TEMPO INOVADOR ---
+        function mudarEscalaTempo(novaEscala) {
+            escalaTempo = novaEscala; localStorage.setItem('estudos_escalaTempo', escalaTempo);
+            atualizarDisplayTempoGlobal(); renderizarGraficoTempoOverlay();
+        }
+
+        function alternarGraficoTempo(mostrar) {
+            mostrarGraficoTempo = mostrar; localStorage.setItem('estudos_mostrarGraficoTempo', mostrar);
+            const overlay = document.getElementById('chart-tempo-overlay');
+            if(overlay) overlay.style.display = mostrar ? 'block' : 'none';
+            if (mostrar) renderizarGraficoTempoOverlay();
+        }
+
+        function resetarTempoEstudado() {
+            let labelText = escalaTempo === 'dia' ? 'HOJE' : (escalaTempo === 'semana' ? 'desta SEMANA' : 'deste MÊS');
+            if(confirm(`Tem certeza que deseja zerar o tempo estudado ${labelText}? Esta ação não pode ser desfeita.`)) {
+                if (escalaTempo === 'dia') { const hoje = getDataStringLocal(); historicoTempo[hoje] = 0; } 
+                else if (escalaTempo === 'semana') { getUltimosDias(7).forEach(d => historicoTempo[d] = 0); } 
+                else if (escalaTempo === 'mes') { getUltimosDias(30).forEach(d => historicoTempo[d] = 0); }
+                salvarDadosLocais(); atualizarDisplayTempoGlobal(); renderizarGraficoTempoOverlay();
+            }
+        }
+
+        function atualizarDisplayTempoGlobal() {
+            let totalSecs = 0; const hoje = getDataStringLocal();
+            const lbl = document.getElementById('label-tempo-global');
+            if (escalaTempo === 'dia') { totalSecs = historicoTempo[hoje] || 0; if(lbl) lbl.innerText = "Tempo Estudado Hoje"; } 
+            else if (escalaTempo === 'semana') { getUltimosDias(7).forEach(d => totalSecs += (historicoTempo[d] || 0)); if(lbl) lbl.innerText = "Tempo Estudado na Semana"; } 
+            else if (escalaTempo === 'mes') { getUltimosDias(30).forEach(d => totalSecs += (historicoTempo[d] || 0)); if(lbl) lbl.innerText = "Tempo Estudado neste Mês"; }
+
+            const h = Math.floor(totalSecs / 3600); const m = Math.floor((totalSecs % 3600) / 60); const s = totalSecs % 60; 
+            const dsp = document.getElementById('display-tempo-global');
+            if(dsp) dsp.innerText = `${h.toString().padStart(2,'0')}h ${m.toString().padStart(2,'0')}m ${s.toString().padStart(2, '0')}s`;
+        }
+
+        function renderizarGraficoTempoOverlay() {
+            if (!mostrarGraficoTempo) return;
+            if (typeof Chart === 'undefined') return; 
+            const canvas = document.getElementById('chart-tempo-overlay'); if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            if (chartTempoInstancia) { chartTempoInstancia.destroy(); }
+            
+            let dias = getUltimosDias(escalaTempo === 'mes' ? 30 : 7); 
+            let dados = dias.map(d => ((historicoTempo[d] || 0) / 3600).toFixed(2)); 
+            let labels = dias.map(d => { let partes = d.split('-'); return `${partes[2]}/${partes[1]}`; });
+
+            let gradient = ctx.createLinearGradient(0, 0, 0, 220);
+            gradient.addColorStop(0, 'rgba(15, 185, 177, 0.45)'); gradient.addColorStop(1, 'rgba(15, 185, 177, 0.0)');
+
+            chartTempoInstancia = new Chart(ctx, {
+                type: 'line',
+                data: { labels: labels, datasets: [{ data: dados, borderColor: '#0fb9b1', borderWidth: 2, backgroundColor: gradient, fill: true, pointRadius: 0, pointHoverRadius: 6, tension: 0.4 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: true, mode: 'index', intersect: false } }, scales: { x: { display: false }, y: { display: false, min: 0 } }, interaction: { mode: 'nearest', axis: 'x', intersect: false } }
+            });
+        }
+
+        // --- PREFERÊNCIAS BASE ---
+        function alternarModoEscuro(ativo) { if (ativo) { document.body.setAttribute('data-theme', 'dark'); localStorage.setItem('estudos_modoEscuro', 'true'); } else { document.body.removeAttribute('data-theme'); localStorage.setItem('estudos_modoEscuro', 'false'); } atualizarEstatisticasGlobais(); renderizarGraficoTempoOverlay(); }
+        function alternarSync(ativo) { syncAtivo = ativo; localStorage.setItem('estudos_sync', ativo ? 'true' : 'false'); }
+        function toggleSidebar() { document.getElementById('main-sidebar').classList.toggle('recolhido'); }
+        function toggleProgressoDetalhes() { const container = document.getElementById('progress-bars-container'); const btn = document.getElementById('btn-toggle-progresso'); container.classList.toggle('show-minibars'); btn.innerText = container.classList.contains('show-minibars') ? 'Ocultar Tópicos ▲' : 'Ver Tópicos ▼'; }
+
+        function sincronizarTelas() { 
+            try { renderizarProgresso(); } catch(e) {}
+            try { renderizarDisciplinas(); } catch(e) {}
+        }
+
+        // --- SISTEMA DE AVISO DE REVISÃO E STATUS EXTREMO ---
+        function isRevisaoExpirada(sub) {
+            if (!sub || !sub.revisaoAtiva || !sub.revisaoTempo || !sub.revisaoInicio) return false;
+            const agora = Date.now(); const passadoMs = agora - sub.revisaoInicio; let fatorMult = 1000; 
+            if(sub.revisaoUnidade === 'minutos') fatorMult = 60 * 1000; else if(sub.revisaoUnidade === 'horas') fatorMult = 60 * 60 * 1000; else if(sub.revisaoUnidade === 'dias') fatorMult = 24 * 60 * 60 * 1000;
+            return passadoMs >= (sub.revisaoTempo * fatorMult);
+        }
+
+        // --- SISTEMA DO MENU DE EDITAIS ---
+        function renderizarMenuEditais() {
+            const divLista = document.getElementById('lista-editais'); if(!divLista) return; divLista.innerHTML = '';
+            ordemEditais.forEach((id, index) => {
+                const edital = bancoDeEditais[id]; if(!edital) return;
+                const item = document.createElement('div'); item.className = `edital-item-container ${editalAtualId === id ? 'active-sub' : ''}`; item.draggable = true; item.dataset.index = index;
+                item.innerHTML = `
+                    <span class="drag-handle" title="Segure para arrastar"><svg class="icon-svg" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg></span>
+                    <div class="edital-text-area" title="${edital.nome}" onclick="selecionarEdital('${id}')"><svg class="icon-svg" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg><span>${edital.nome}</span></div>
+                    <div class="edital-actions"><button class="btn-icon" data-edit-id="${id}" style="font-size: 0.8rem; padding:0; color:white;" onclick="renomearEdital('${id}', this)" title="Renomear">✏️</button>${ordemEditais.length > 1 ? `<button class="btn-icon" style="font-size: 0.8rem; padding:0; color:white;" onclick="excluirEdital('${id}')" title="Excluir">🗑️</button>` : ''}</div>
+                `;
+                item.addEventListener('dragstart', function(e) { dragStartIndex = +this.dataset.index; e.dataTransfer.effectAllowed = "move"; }); item.addEventListener('dragover', function(e) { e.preventDefault(); }); item.addEventListener('dragenter', function(e) { e.preventDefault(); this.classList.add('drag-over'); }); item.addEventListener('dragleave', function(e) { this.classList.remove('drag-over'); }); item.addEventListener('drop', function(e) { e.preventDefault(); this.classList.remove('drag-over'); const dragEndIndex = +this.dataset.index; const itemArrastado = ordemEditais.splice(dragStartIndex, 1)[0]; ordemEditais.splice(dragEndIndex, 0, itemArrastado); renderizarMenuEditais(); salvarDadosLocais(); });
+                divLista.appendChild(item);
+            });
+        }
+        function selecionarEdital(idEdital) { editalAtualId = idEdital; renderizarMenuEditais(); mudarAba('home'); const titleElem = document.getElementById('titulo-visao-geral'); if(titleElem && bancoDeEditais[idEdital]) titleElem.innerText = `Progresso do Edital: ${bancoDeEditais[idEdital].nome}`; sincronizarTelas(); salvarDadosLocais(); }
+        function criarEditalManual() { const novoId = 'edital-' + Date.now(); bancoDeEditais[novoId] = { nome: "Novo Edital", areas: [] }; ordemEditais.push(novoId); selecionarEdital(novoId); setTimeout(() => { const btn = document.querySelector(`.edital-actions .btn-icon[data-edit-id="${novoId}"]`); if(btn) btn.click(); }, 50); }
+        function renomearEdital(id, btnElement) { event.stopPropagation(); const textArea = btnElement.closest('.edital-item-container').querySelector('.edital-text-area span'); makeInlineEditable(textArea, bancoDeEditais[id].nome, (newVal) => { bancoDeEditais[id].nome = newVal; renderizarMenuEditais(); if(editalAtualId === id) document.getElementById('titulo-visao-geral').innerText = `Progresso do Edital: ${newVal}`; salvarDadosLocais(); }); }
+        function excluirEdital(id) { if(confirm("Deseja apagar este edital?")) { delete bancoDeEditais[id]; ordemEditais = ordemEditais.filter(e => e !== id); if(editalAtualId === id) selecionarEdital(ordemEditais[0]); else renderizarMenuEditais(); salvarDadosLocais(); } }
+
+        // --- RENDERIZAÇÃO DA HOME E DISCIPLINAS ---
+        function calcularProgressoTopico(sub) {
+            if(!sub) return 0;
+            if(!sub.miniTarefas || !Array.isArray(sub.miniTarefas) || sub.miniTarefas.length === 0) return sub.concluido ? 100 : 0;
+            const done = sub.miniTarefas.filter(m => m && m.concluida).length; return Math.round((done / sub.miniTarefas.length) * 100);
+        }
+        
+        function renderizarProgresso() {
+            const container = document.getElementById('progress-bars-container'); if(!container) return; container.innerHTML = ''; const edital = bancoDeEditais[editalAtualId]; if(!edital || !edital.areas) return;
+            edital.areas.forEach(area => {
+                if(!area) return;
+                let sumPct = 0; let miniBarsHtml = ''; const totalSubs = (area.sub && Array.isArray(area.sub)) ? area.sub.length : 0;
+                if(totalSubs > 0) { area.sub.forEach(sub => { if(!sub) return; const subPct = calcularProgressoTopico(sub); sub.concluido = (subPct === 100); sumPct += subPct; miniBarsHtml += `<div class="mini-bar-container" title="${sub.nome} (${subPct}%)"><div class="mini-bar-title"><span>${sub.nome}</span><span>${subPct}%</span></div><div class="mini-bar-bg"><div class="mini-bar-fill" style="width: ${subPct}%; background: ${area.cor || '#0fb9b1'};"></div></div></div>`; }); } else miniBarsHtml = `<div style="font-size:0.8rem; color:var(--text-muted); width:100%;">Sem tópicos</div>`;
+                const porcentagem = totalSubs === 0 ? 0 : Math.round(sumPct / totalSubs);
+                container.innerHTML += `<div class="progress-container"><div class="progress-header"><span>${area.nome}</span> <span>${porcentagem}%</span></div><div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${porcentagem}%; background-color: ${area.cor || '#0fb9b1'};"></div></div><div class="mini-bars-wrapper">${miniBarsHtml}</div></div>`;
+            });
+        }
+        
+        function renderizarDisciplinas() {
+            const container = document.getElementById('disciplinas-container'); if(!container) return; container.innerHTML = ''; const edital = bancoDeEditais[editalAtualId]; if(!edital || !edital.areas) return;
+            edital.areas.forEach(area => {
+                if(!area) return;
+                const areaDiv = document.createElement('div'); areaDiv.className = 'area-card'; areaDiv.style.borderLeftColor = area.cor || '#0fb9b1';
+                areaDiv.innerHTML = `<div class="area-header"><div style="display:flex; align-items:center; gap: 10px; flex:1;"><input type="color" value="${area.cor || '#0fb9b1'}" class="color-picker" onchange="mudarCorArea('${area.id}', this.value)"><strong style="font-size: 1.1rem; color:var(--title-color);">${area.nome}</strong></div><div style="display:flex; gap: 5px;"><button class="btn-icon" data-area-edit-id="${area.id}" onclick="editarNomeArea('${area.id}', this)" title="Editar Área">✏️</button><button class="btn-icon" onclick="excluirArea('${area.id}')" title="Excluir Área">🗑️</button></div></div>`;
+                const subList = document.createElement('div'); subList.className = 'sub-list';
+                
+                if (area.sub && Array.isArray(area.sub)) {
+                    area.sub.forEach(sub => {
+                        if(!sub) return;
+                        const pct = calcularProgressoTopico(sub); 
+                        const expirada = isRevisaoExpirada(sub); 
+                        const statusClass = pct === 100 ? 'badge-done' : 'badge-pending'; 
+                        const statusText = pct === 100 ? 'Concluído' : (pct > 0 ? `${pct}% Concluído` : 'Pendente');
+                        
+                        const subCard = document.createElement('div'); 
+                        subCard.className = `sub-item-card ${expirada ? 'revisao-urgente' : ''}`; 
+                        subCard.onclick = () => abrirAmbienteTopico(area.id, sub.id);
+                        
+                        subCard.innerHTML = `<div class="sub-item-header"><span class="sub-item-title" style="${pct === 100 ? 'text-decoration:line-through; opacity:0.6;' : ''}">${sub.nome}</span></div><div style="display:flex; justify-content:space-between; align-items:center;"><span class="badge-status ${statusClass}">${statusText}</span><div style="display:flex; align-items:center; gap: 8px;"><span style="font-size:0.8rem; color:var(--text-muted);">📈 A:${sub.acertos||0} | E:${sub.erros||0}</span><button class="btn-icon" style="font-size: 0.9rem;" data-sub-edit-id="${sub.id}" onclick="editarNomeSub('${area.id}', '${sub.id}', this)" title="Editar Tópico">✏️</button><button class="btn-icon" style="font-size: 0.9rem;" onclick="event.stopPropagation(); excluirSub('${area.id}', '${sub.id}')" title="Excluir Tópico">🗑️</button></div></div>`;
+                        subList.appendChild(subCard);
+                    });
+                }
+                areaDiv.appendChild(subList);
+                const btnAddSub = document.createElement('button'); btnAddSub.className = 'btn-add-sub'; btnAddSub.innerText = '+ Adicionar Tópico'; 
+                btnAddSub.onclick = () => { 
+                    try {
+                        const novoId = 's' + Date.now(); 
+                        if (!area.sub) area.sub = [];
+                        area.sub.push({ id: novoId, nome: "Novo Tópico", concluido: false, miniTarefas: [] }); 
+                        sincronizarTelas(); salvarDadosLocais(); 
+                        setTimeout(() => { const btn = document.querySelector(`button[data-sub-edit-id="${novoId}"]`); if(btn) btn.click(); }, 50); 
+                    } catch(e) { console.error(e); }
+                };
+                areaDiv.appendChild(btnAddSub); container.appendChild(areaDiv);
+            });
+        }
+
+        function adicionarAreaManual() { 
+            try {
+                const novoId = 'a' + Date.now(); 
+                if(!bancoDeEditais[editalAtualId].areas) bancoDeEditais[editalAtualId].areas = [];
+                bancoDeEditais[editalAtualId].areas.push({id: novoId, nome: "Nova Área", cor: '#0fb9b1', sub: []}); 
+                sincronizarTelas(); salvarDadosLocais(); 
+                setTimeout(() => { const btn = document.querySelector(`button[data-area-edit-id="${novoId}"]`); if(btn) btn.click(); }, 50); 
+            } catch(e) {}
+        }
+        function editarNomeArea(areaId, btnElement) { event.stopPropagation(); const strongElement = btnElement.closest('.area-header').querySelector('strong'); const area = bancoDeEditais[editalAtualId].areas.find(a => a.id === areaId); makeInlineEditable(strongElement, area.nome, (newVal) => { area.nome = newVal; sincronizarTelas(); salvarDadosLocais(); }); }
+        function mudarCorArea(areaId, cor) { const area = bancoDeEditais[editalAtualId].areas.find(a => a.id === areaId); area.cor = cor; sincronizarTelas(); salvarDadosLocais(); }
+        function excluirArea(id) { if(confirm("Apagar área e tópicos?")) { bancoDeEditais[editalAtualId].areas = bancoDeEditais[editalAtualId].areas.filter(x => x && x.id !== id); sincronizarTelas(); salvarDadosLocais(); } }
+        function editarNomeSub(areaId, subId, btnElement) { event.stopPropagation(); const spanElement = btnElement.closest('.sub-item-card').querySelector('.sub-item-title'); const sub = bancoDeEditais[editalAtualId].areas.find(a => a.id === areaId).sub.find(s => s.id === subId); makeInlineEditable(spanElement, sub.nome, (newVal) => { sub.nome = newVal; sincronizarTelas(); salvarDadosLocais(); }); }
+        function excluirSub(aId, sId) { const a = bancoDeEditais[editalAtualId].areas.find(x => x.id === aId); a.sub = a.sub.filter(y => y && y.id !== sId); sincronizarTelas(); salvarDadosLocais(); }
+
+        // --- AMBIENTE DA DISCIPLINA E REVISÃO ---
+        let intervaloBarraRevisao = null;
+
+        function mudarAba(idAba, botaoClicado) { 
+            fecharAmbienteTopico(); document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active')); 
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active')); document.getElementById(idAba).classList.add('active'); 
+            if(botaoClicado) botaoClicado.classList.add('active'); if(idAba === 'questoes') atualizarEstatisticasGlobais(); 
+        }
+        
+        function abrirAmbienteTopico(areaId, subId) {
+            topicoAtivoAId = areaId; topicoAtivoSId = subId; 
+            const area = bancoDeEditais[editalAtualId].areas.find(a => a.id === areaId); 
+            const sub = area.sub.find(s => s.id === subId); const pct = calcularProgressoTopico(sub);
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active')); 
+            document.getElementById('ambiente-topico').classList.add('active'); 
+            document.getElementById('main-sidebar').classList.add('recolhido'); 
+            document.getElementById('amb-area-name').innerText = area.nome; document.getElementById('amb-sub-name').innerText = sub.nome;
+            const btnConcluido = document.getElementById('btn-toggle-concluido'); btnConcluido.innerText = pct === 100 ? "Reabrir Tópico 🔄" : "Marcar como Concluído ✅"; btnConcluido.style.background = pct === 100 ? "var(--text-muted)" : "var(--success)";
+            renderizarBlocoRevisao(sub); renderizarMinitarefasAtual(); renderizarTarefasDiaGlobais();
+        }
+
+        function removerDetalheErro(subId, idx) {
+            const sub = bancoDeEditais[editalAtualId].areas.find(a => a.id === topicoAtivoAId).sub.find(s => s.id === subId);
+            if(sub && sub.detalhesErros) { sub.detalhesErros.splice(idx, 1); salvarDadosLocais(); renderizarBlocoRevisao(sub); }
+        }
+        function zerarErrosTopico(subId) {
+            const sub = bancoDeEditais[editalAtualId].areas.find(a => a.id === topicoAtivoAId).sub.find(s => s.id === subId);
+            if(sub) { sub.erros = 0; salvarDadosLocais(); renderizarBlocoRevisao(sub); }
+        }
+
+        function renderizarBlocoRevisao(sub) {
+            const listaSugestoes = document.getElementById('amb-sugestoes-erros-lista'); listaSugestoes.innerHTML = '';
+            
+            if(sub.detalhesErros && sub.detalhesErros.length > 0) { 
+                sub.detalhesErros.forEach((erro, idx) => { 
+                    listaSugestoes.innerHTML += `<li class="sugestao-item"><span>${erro}</span><button class="btn-del-sugestao" onclick="removerDetalheErro('${sub.id}', ${idx})" title="Marcar como revisado">✖</button></li>`; 
+                }); 
+            } else if (sub.erros > 0) { 
+                listaSugestoes.innerHTML = `<li class="sugestao-item"><span>Revise os conceitos teóricos vinculados aos seus ${sub.erros} erros recentes no tópico <strong>"${sub.nome}"</strong>.</span><button class="btn-del-sugestao" onclick="zerarErrosTopico('${sub.id}')" title="Marcar como revisado">✖</button></li>`; 
+            } else { 
+                listaSugestoes.innerHTML = `<li style="color:var(--success); list-style:none;">Excelente! Nenhum erro pendente para revisão neste assunto.</li>`; 
+            }
+
+            const setupContainer = document.getElementById('setup-revisao-container'); const barraContainer = document.getElementById('barra-revisao-container'); const inputTempo = document.getElementById('input-tempo-revisao'); const selectUnid = document.getElementById('select-unidade-revisao'); const cardRevisao = document.getElementById('card-revisao-espacada');
+            if(intervaloBarraRevisao) clearInterval(intervaloBarraRevisao);
+            cardRevisao.classList.remove('revisao-urgente'); document.getElementById('texto-status-revisao').classList.remove('text-urgente'); document.getElementById('fill-barra-revisao').classList.remove('bg-urgente');
+
+            if(sub.revisaoAtiva && sub.revisaoTempo > 0 && sub.revisaoInicio) {
+                setupContainer.style.display = 'none'; barraContainer.style.display = 'block';
+                const atualizarBarra = () => {
+                    const agora = Date.now(); const passadoMs = agora - sub.revisaoInicio; let fatorMult = 1000; 
+                    if(sub.revisaoUnidade === 'minutos') fatorMult = 60 * 1000; else if(sub.revisaoUnidade === 'horas') fatorMult = 60 * 60 * 1000; else if(sub.revisaoUnidade === 'dias') fatorMult = 24 * 60 * 60 * 1000;
+                    const totalMs = sub.revisaoTempo * fatorMult; let porcentagemTempo = Math.min((passadoMs / totalMs) * 100, 100);
+                    document.getElementById('pct-barra-revisao').innerText = `${porcentagemTempo.toFixed(1)}%`; document.getElementById('fill-barra-revisao').style.width = `${porcentagemTempo}%`;
+
+                    if(porcentagemTempo >= 100) {
+                        document.getElementById('texto-status-revisao').innerText = "ATENÇÃO: É HORA DE REVISAR!"; document.getElementById('texto-alerta-revisao').innerText = "O relógio expirou. Faça a revisão e conclua para reiniciar.";
+                        cardRevisao.classList.add('revisao-urgente'); document.getElementById('texto-status-revisao').classList.add('text-urgente'); document.getElementById('fill-barra-revisao').classList.add('bg-urgente');
+                        if(intervaloBarraRevisao) clearInterval(intervaloBarraRevisao); 
+                    } else {
+                        document.getElementById('texto-status-revisao').innerText = `Progresso do Relógio (Meta: ${sub.revisaoTempo} ${sub.revisaoUnidade})`;
+                        const numRestantes = (totalMs - passadoMs) / fatorMult; const formatedRestantes = sub.revisaoUnidade === 'segundos' ? Math.ceil(numRestantes) : numRestantes.toFixed(1);
+                        document.getElementById('texto-alerta-revisao').innerText = `Faltam ~${formatedRestantes} ${sub.revisaoUnidade} para a revisão limite.`;
+                    }
+                };
+                atualizarBarra(); intervaloBarraRevisao = setInterval(atualizarBarra, 1000); 
+            } else { setupContainer.style.display = 'flex'; barraContainer.style.display = 'none'; inputTempo.value = ''; selectUnid.value = 'dias'; }
+        }
+
+        function iniciarCicloTemporalRevisao() {
+            const sub = bancoDeEditais[editalAtualId].areas.find(a => a.id === topicoAtivoAId).sub.find(s => s.id === topicoAtivoSId);
+            const tempo = parseInt(document.getElementById('input-tempo-revisao').value); const unidade = document.getElementById('select-unidade-revisao').value;
+            if(isNaN(tempo) || tempo <= 0) { alert("Insira uma quantidade válida."); return; }
+            sub.revisaoAtiva = true; sub.revisaoTempo = tempo; sub.revisaoUnidade = unidade; sub.revisaoInicio = Date.now();
+            salvarDadosLocais(); renderizarBlocoRevisao(sub); sincronizarTelas(); 
+        }
+        function cancelarCicloRevisao() { const sub = bancoDeEditais[editalAtualId].areas.find(a => a.id === topicoAtivoAId).sub.find(s => s.id === topicoAtivoSId); sub.revisaoAtiva = false; sub.revisaoTempo = 0; sub.revisaoInicio = null; salvarDadosLocais(); renderizarBlocoRevisao(sub); sincronizarTelas();}
+        function resetarCicloRevisao() { const sub = bancoDeEditais[editalAtualId].areas.find(a => a.id === topicoAtivoAId).sub.find(s => s.id === topicoAtivoSId); sub.revisaoInicio = Date.now(); salvarDadosLocais(); renderizarBlocoRevisao(sub); sincronizarTelas();}
+        function fecharAmbienteTopico() { if(intervaloBarraRevisao) clearInterval(intervaloBarraRevisao); document.getElementById('ambiente-topico').classList.remove('active'); if(document.getElementById('ambiente-topico').style.display !== 'none') document.getElementById('disciplinas').classList.add('active'); sincronizarTelas();}
+        
+        function alternarConclusaoTopicoAtual() { 
+            const sub = bancoDeEditais[editalAtualId].areas.find(a => a.id === topicoAtivoAId).sub.find(s => s.id === topicoAtivoSId); 
+            const targetStatus = !(calcularProgressoTopico(sub) === 100); 
+            sub.concluido = targetStatus; if(sub.miniTarefas) sub.miniTarefas.forEach(m => m.concluida = targetStatus); 
+            if(syncAtivo) {
+                const nomeTopicoOriginal = sub.nome.trim().toLowerCase();
+                for(let eId in bancoDeEditais) {
+                    if(eId === editalAtualId) continue;
+                    bancoDeEditais[eId].areas.forEach(outraArea => { outraArea.sub.forEach(outroSub => {
+                        if(outroSub.nome.trim().toLowerCase() === nomeTopicoOriginal) {
+                            outroSub.concluido = targetStatus;
+                            if(outroSub.miniTarefas) outroSub.miniTarefas.forEach(m => m.concluida = targetStatus);
+                        }
+                    });});
+                }
+            }
+            sincronizarTelas(); salvarDadosLocais(); abrirAmbienteTopico(topicoAtivoAId, topicoAtivoSId); 
+        }
+
+        function adicionarMinitarefaAtual() { const input = document.getElementById('input-minitarefa-amb'); const texto = input.value.trim(); if(texto !== '') { const sub = bancoDeEditais[editalAtualId].areas.find(a => a.id === topicoAtivoAId).sub.find(s => s.id === topicoAtivoSId); if(!sub.miniTarefas) sub.miniTarefas = []; sub.miniTarefas.push({ id: 'mt'+Date.now(), texto: texto, concluida: false }); input.value = ''; sincronizarTelas(); salvarDadosLocais(); renderizarMinitarefasAtual(); abrirAmbienteTopico(topicoAtivoAId, topicoAtivoSId); } }
+        function renderizarMinitarefasAtual() { const lista = document.getElementById('amb-minitarefas-lista'); if(!lista) return; lista.innerHTML = ''; const sub = bancoDeEditais[editalAtualId].areas.find(a => a.id === topicoAtivoAId).sub.find(s => s.id === topicoAtivoSId); if(sub && sub.miniTarefas && sub.miniTarefas.length > 0) { sub.miniTarefas.forEach(mt => { lista.innerHTML += `<li class="task-item" style="border-left: 5px solid var(--success);"><div class="task-content"><input type="checkbox" ${mt.concluida ? 'checked' : ''} onchange="toggleMinitarefa('${mt.id}', this.checked)"><span style="${mt.concluida ? 'text-decoration:line-through; opacity:0.5;' : ''}">${mt.texto}</span></div><div class="task-actions"><button class="btn-icon" title="Editar Passo" onclick="editarMinitarefa('${mt.id}', this)">✏️</button><button class="btn-icon" title="Excluir Passo" onclick="excluirMinitarefa('${mt.id}')">🗑️</button></div></li>`; }); } else lista.innerHTML = `<li style="color:var(--text-muted); font-size:0.9rem; padding:10px;">Sem passos criados. Digite acima para dividir o tópico.</li>`; }
+        function toggleMinitarefa(mtId, isChecked) { 
+            const edital = bancoDeEditais[editalAtualId]; const sub = edital.areas.find(a => a.id === topicoAtivoAId).sub.find(s => s.id === topicoAtivoSId); const mt = sub.miniTarefas.find(m => m.id === mtId); 
+            if(mt) { mt.concluida = isChecked; 
+                if(syncAtivo) {
+                    const nomeTopicoOriginal = sub.nome.trim().toLowerCase(); const nomeMinitarefaOriginal = mt.texto.trim().toLowerCase();
+                    for(let eId in bancoDeEditais) {
+                        if(eId === editalAtualId) continue;
+                        bancoDeEditais[eId].areas.forEach(outraArea => { outraArea.sub.forEach(outroSub => {
+                            if(outroSub.nome.trim().toLowerCase() === nomeTopicoOriginal) {
+                                if(outroSub.miniTarefas) outroSub.miniTarefas.forEach(outraMt => { if(outraMt.texto.trim().toLowerCase() === nomeMinitarefaOriginal) outraMt.concluida = isChecked; });
+                                const totalMt = outroSub.miniTarefas ? outroSub.miniTarefas.length : 0; const doneMt = outroSub.miniTarefas ? outroSub.miniTarefas.filter(m => m.concluida).length : 0;
+                                outroSub.concluido = (totalMt > 0 && totalMt === doneMt);
+                            }
+                        });});
+                    }
+                }
+                sincronizarTelas(); salvarDadosLocais(); abrirAmbienteTopico(topicoAtivoAId, topicoAtivoSId); 
+            }
+        }
+        function excluirMinitarefa(mtId) { const sub = bancoDeEditais[editalAtualId].areas.find(a => a.id === topicoAtivoAId).sub.find(s => s.id === topicoAtivoSId); sub.miniTarefas = sub.miniTarefas.filter(m => m.id !== mtId); sincronizarTelas(); salvarDadosLocais(); abrirAmbienteTopico(topicoAtivoAId, topicoAtivoSId); }
+        function editarMinitarefa(mtId, btnElement) { const spanElement = btnElement.closest('.task-item').querySelector('.task-content span'); const sub = bancoDeEditais[editalAtualId].areas.find(a => a.id === topicoAtivoAId).sub.find(s => s.id === topicoAtivoSId); const mt = sub.miniTarefas.find(m => m.id === mtId); makeInlineEditable(spanElement, mt.texto, (newVal) => { mt.texto = newVal; sincronizarTelas(); salvarDadosLocais(); renderizarMinitarefasAtual(); }); }
+
+        // --- TAREFAS DIÁRIAS E DA SEMANA ---
+        function adicionarTarefaDiariaGlobal(inputIdText, inputIdTime = null) { const texto = document.getElementById(inputIdText).value.trim(); let tempo = 25; if(inputIdTime) { const val = parseInt(document.getElementById(inputIdTime).value); if(!isNaN(val) && val > 0) tempo = val; } if (texto !== '') { tarefasDoDia.push({ id: 't'+Date.now(), texto: texto, concluida: false, tempoMin: tempo, cor: '#0fb9b1' }); document.getElementById(inputIdText).value = ''; if(inputIdTime) document.getElementById(inputIdTime).value = ''; salvarDadosLocais(); renderizarTarefasDiaGlobais(); } }
+        function deletarTarefaDiaria(id) { tarefasDoDia = tarefasDoDia.filter(t => t.id !== id); salvarDadosLocais(); renderizarTarefasDiaGlobais(); }
+        function atualizarTempoTarefa(id, novoTempo) { const val = parseInt(novoTempo); if(!isNaN(val) && val >= 0) { tarefasDoDia.find(t => t.id === id).tempoMin = val; salvarDadosLocais(); renderizarTarefasDiaGlobais(); } }
+        function mudarCorTarefa(id, cor) { tarefasDoDia.find(t => t.id === id).cor = cor; salvarDadosLocais(); renderizarTarefasDiaGlobais(); }
+        function editarTarefaDiaria(id, btnElement) { const spanElement = btnElement.closest('.task-item').querySelector('.task-content span'); const t = tarefasDoDia.find(t => t.id === id); makeInlineEditable(spanElement, t.texto, (newVal) => { t.texto = newVal; salvarDadosLocais(); renderizarTarefasDiaGlobais(); }); }
+        
+        function renderizarTarefasDiaGlobais() { 
+            const ulHome = document.getElementById('container-tarefas-hoje'); 
+            if(ulHome) { 
+                ulHome.innerHTML = ''; 
+                tarefasDoDia.forEach(t => { 
+                    ulHome.innerHTML += `<li class="task-item" style="border-left: 5px solid ${t.cor};"><div class="task-content"><input type="checkbox" ${t.concluida ? 'checked' : ''} onchange="toggleConcluidaTarefa('${t.id}', this.checked)"><span style="${t.concluida ? 'text-decoration:line-through; opacity:0.5;' : ''}">${t.texto}</span></div><div class="task-actions"><input type="color" value="${t.cor}" class="color-picker" title="Destacar com cor" onchange="mudarCorTarefa('${t.id}', this.value)"><button class="btn-icon" title="Editar" onclick="editarTarefaDiaria('${t.id}', this)">✏️</button><button class="btn-icon" title="Excluir" onclick="deletarTarefaDiaria('${t.id}')">🗑️</button></div></li>`; 
+                }); 
+            } 
+            const ulAmb = document.getElementById('amb-tarefas-lista'); 
+            if(ulAmb) { 
+                ulAmb.innerHTML = ''; 
+                tarefasDoDia.forEach(t => { 
+                    ulAmb.innerHTML += `<li class="task-item" style="border-left: 5px solid ${t.cor};"><div class="task-content"><input type="checkbox" ${t.concluida ? 'checked' : ''} onchange="toggleConcluidaTarefa('${t.id}', this.checked)"><span style="${t.concluida ? 'text-decoration:line-through; opacity:0.5;' : ''}">${t.texto}</span></div><div class="task-actions"><span style="font-size:0.8rem; color:var(--text-muted);">Tempo:</span><input type="number" class="time-input" title="Minutos" value="${t.tempoMin}" onchange="atualizarTempoTarefa('${t.id}', this.value)"><input type="color" value="${t.cor}" class="color-picker" title="Destacar com cor" onchange="mudarCorTarefa('${t.id}', this.value)"><button class="btn-icon" title="Editar" onclick="editarTarefaDiaria('${t.id}', this)">✏️</button><button class="btn-icon" title="Excluir" onclick="deletarTarefaDiaria('${t.id}')">🗑️</button></div></li>`; 
+                }); 
+            } 
+        }
+
+        function toggleConcluidaTarefa(id, status) { tarefasDoDia.find(t => t.id === id).concluida = status; salvarDadosLocais(); renderizarTarefasDiaGlobais(); }
+        function toggleWeeklySchedule() { const m = document.getElementById('weekly-schedule-container'); if(m) m.style.display = m.style.display === 'block' ? 'none' : 'block'; }
+        function toggleAccordion(btn) { const c = btn.nextElementSibling; const i = btn.querySelector('span'); if (c.style.display === 'block') { c.style.display = 'none'; btn.style.background = 'var(--hover-bg)'; i.innerText = '▼'; } else { c.style.display = 'block'; btn.style.background = 'var(--secondary)'; btn.style.color = 'white'; i.innerText = '▲'; } }
+        function criarElementoTarefaSemana(texto) { const li = document.createElement('li'); li.className = 'task-item'; li.innerHTML = `<div class="task-content"><input type="checkbox"> <span class="task-text">${texto}</span></div><div class="task-actions"><input type="color" value="#0fb9b1" class="color-picker" oninput="this.parentElement.parentElement.style.borderLeft='5px solid '+this.value;"><button class="btn-icon" onclick="editarTarefaSemana(this)">✏️</button><button class="btn-icon" onclick="this.parentElement.parentElement.style.opacity='0'; setTimeout(()=>this.parentElement.parentElement.remove(), 300)">🗑️</button></div>`; return li; }
+        function editarTarefaSemana(btnElement) { const spanElement = btnElement.closest('.task-item').querySelector('.task-text'); makeInlineEditable(spanElement, spanElement.innerText, (newVal) => { spanElement.innerText = newVal; }); }
+        function adicionarTarefaSemana(diaId) { const input = document.getElementById('input-' + diaId); if (input.value.trim() !== '') { document.getElementById('lista-' + diaId).appendChild(criarElementoTarefaSemana(input.value.trim())); input.value = ''; } }
+
+        // --- MODO FOCO GERAL E BOTÃO SAIR ---
+        let filaCronometro = []; let indexCronometro = 0; let timerInterval = null; let tempoRestanteSegundos = 0; let timerRodando = false; let tempoTotalDaTarefaAtual = 0;
+        
+        function sairModoFocoGlobal() { 
+            try { pauseTimer(); } catch(e) {}
+            if(isSpotifyPlaying) { try { spotifyAction('pause'); } catch(e){} }
+
+            document.body.classList.remove('focus-mode'); 
+            document.querySelectorAll('.focus-container').forEach(c => c.classList.remove('active-focus')); 
+            
+            const pTask = document.getElementById('glass-task-panel'); if(pTask) pTask.classList.remove('active');
+            const pMusic = document.getElementById('glass-music-panel'); if(pMusic) pMusic.classList.remove('active');
+            
+            const btnFloat = document.getElementById('btn-floating-tasks'); if(btnFloat) btnFloat.classList.remove('visible');
+            const btnMusic = document.getElementById('btn-floating-music'); if(btnMusic) btnMusic.classList.remove('visible');
+
+            try { atualizarDisplayTempoGlobal(); renderizarGraficoTempoOverlay(); atualizarEstatisticasGlobais(); salvarDadosLocais(); sincronizarTelas(); } catch(e) {}
+        }
+
+        // --- TOGGLES DE PAINEL ---
+        function toggleFocusTasks() {
+            const panel = document.getElementById('glass-task-panel'); 
+            const pMusic = document.getElementById('glass-music-panel');
+            
+            if (panel.classList.contains('active')) { 
+                panel.classList.remove('active'); 
+            } else { 
+                if(pMusic) pMusic.classList.remove('active'); 
+                panel.classList.add('active'); 
+                renderizarFilaTarefasFoco(); 
+            }
+        }
+
+        function toggleFocusMusic() {
+            const panel = document.getElementById('glass-music-panel');
+            const pTask = document.getElementById('glass-task-panel');
+            
+            if (panel.classList.contains('active')) {
+                panel.classList.remove('active');
+            } else {
+                if(pTask) pTask.classList.remove('active');
+                panel.classList.add('active');
+            }
+        }
+
+        // --- CRONÔMETRO ---
+        function iniciarFocusTimer() { 
+            filaCronometro = tarefasDoDia.filter(t => !t.concluida && t.tempoMin > 0); 
+            if(filaCronometro.length === 0) { alert("Adicione tarefas com tempo para iniciar."); return; } 
+            indexCronometro = 0; document.body.classList.add('focus-mode'); 
+            document.querySelectorAll('.focus-container').forEach(c => c.classList.remove('active-focus')); 
+            document.getElementById('focus-timer').classList.add('active-focus'); 
+            document.getElementById('btn-floating-tasks').classList.add('visible'); 
+            document.getElementById('btn-floating-music').classList.add('visible');
+            carregarTarefaCronometro(); 
+        }
+
+        function renderizarFilaTarefasFoco() {
+            const list = document.getElementById('focus-task-list'); if(!list) return; list.innerHTML = '';
+            if (filaCronometro.length === 0) { list.innerHTML = `<div style="text-align: center; color: rgba(255,255,255,0.5); margin-top: 50px;"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:15px; opacity:0.6;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg><p>Ainda não há tarefas — adicione uma acima para manter o foco.</p></div>`; return; }
+            filaCronometro.forEach((t, i) => {
+                const li = document.createElement('li'); li.className = 'focus-task-item'; li.dataset.taskId = t.id;
+                if(i === indexCronometro) li.classList.add('current'); else if (i < indexCronometro) li.style.opacity = '0.4';
+                li.innerHTML = `<div style="display:flex; align-items:center; gap: 10px; flex:1;"><span>${i === indexCronometro ? '▶ ' : ''}</span><span class="focus-task-text" style="flex:1;">${t.texto}</span></div><div style="display:flex; align-items:center; gap: 8px;"><span style="font-size:0.85rem; opacity:0.8; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;">${t.tempoMin}m</span><button class="btn-icon btn-edit-inline" style="color:white; font-size:1rem; padding:0;" onclick="editarTarefaFoco('${t.id}', this)">✏️</button></div>`;
+                list.appendChild(li);
+            });
+        }
+
+        function editarTarefaFoco(id, btnElement) {
+            const spanElement = btnElement.closest('.focus-task-item').querySelector('.focus-task-text'); const t = filaCronometro.find(t => t.id === id);
+            makeInlineEditable(spanElement, t.texto, (newVal) => { t.texto = newVal; const globalTask = tarefasDoDia.find(gt => gt.id === id); if(globalTask) globalTask.texto = newVal; salvarDadosLocais(); renderizarTarefasDiaGlobais(); renderizarFilaTarefasFoco(); if(filaCronometro[indexCronometro] && filaCronometro[indexCronometro].id === id) { document.getElementById('timer-task-name').innerText = newVal; } });
+        }
+
+        function adicionarTarefaFocoRapida() {
+            const novoId = 't' + Date.now(); const novaTarefa = { id: novoId, texto: "Nova Tarefa", concluida: false, tempoMin: 25, cor: '#0fb9b1' };
+            tarefasDoDia.push(novaTarefa); filaCronometro.push(novaTarefa); salvarDadosLocais(); renderizarTarefasDiaGlobais(); renderizarFilaTarefasFoco();
+            setTimeout(() => { const btn = document.querySelector(`.focus-task-item[data-task-id="${novoId}"] .btn-edit-inline`); if(btn) btn.click(); }, 50);
+        }
+
+        function carregarTarefaCronometro() { 
+            if(indexCronometro >= filaCronometro.length) { document.getElementById('timer-task-name').innerText = "🎉 Rotina Concluída!"; document.getElementById('timer-display').innerText = "00:00"; document.getElementById('btn-main-play').style.display = 'none'; return; } 
+            document.getElementById('btn-main-play').style.display = 'inline-block'; const t = filaCronometro[indexCronometro]; document.getElementById('timer-task-name').innerText = t.texto; 
+            tempoTotalDaTarefaAtual = t.tempoMin * 60; tempoRestanteSegundos = tempoTotalDaTarefaAtual; renderizarFilaTarefasFoco(); atualizarDisplayCronometro(); timerRodando = false; document.getElementById('btn-main-play').innerText = "Começar";
+        }
+
+        function atualizarDisplayCronometro() { 
+            const m = Math.floor(tempoRestanteSegundos / 60).toString().padStart(2, '0'); const s = (tempoRestanteSegundos % 60).toString().padStart(2, '0'); document.getElementById('timer-display').innerText = `${m}:${s}`; 
+            const circle = document.querySelector('.timer-progress');
+            if(circle && tempoTotalDaTarefaAtual > 0) { const radius = circle.r.baseVal.value; const circumference = radius * 2 * Math.PI; circle.style.strokeDasharray = `${circumference} ${circumference}`; const offset = circumference - (tempoRestanteSegundos / tempoTotalDaTarefaAtual) * circumference; circle.style.strokeDashoffset = isNaN(offset) ? 0 : offset; }
+        }
+
+        function togglePlayPauseTimer() { if(timerRodando) { pauseTimer(); document.getElementById('btn-main-play').innerText = "Retomar"; } else { playTimer(); document.getElementById('btn-main-play').innerText = "Pausar"; } }
+        
+        function playTimer() { 
+            if(timerRodando || indexCronometro >= filaCronometro.length) return; timerRodando = true; document.getElementById('btn-main-play').innerText = "Pausar";
+            timerInterval = setInterval(() => { 
+                if(tempoRestanteSegundos > 0) { 
+                    tempoRestanteSegundos--; tempoGlobalEstudadoSegundos++; 
+                    const hojeStr = getDataStringLocal(); historicoTempo[hojeStr] = (historicoTempo[hojeStr] || 0) + 1;
+                    atualizarDisplayCronometro(); atualizarDisplayTempoGlobal(); 
+                    try { localStorage.setItem('estudos_historicoTempo', JSON.stringify(historicoTempo)); localStorage.setItem('estudos_tempoGlobal', tempoGlobalEstudadoSegundos.toString()); } catch(e){}
+                } else { 
+                    pauseTimer(); alert("⏰ Tempo concluído!"); tarefasDoDia.find(t => t.id === filaCronometro[indexCronometro].id).concluida = true; 
+                    atualizarDisplayTempoGlobal(); renderizarGraficoTempoOverlay(); salvarDadosLocais(); renderizarTarefasDiaGlobais(); nextTimerTask(); 
+                } 
+            }, 1000); 
+        }
+
+        function pauseTimer() { timerRodando = false; clearInterval(timerInterval); atualizarDisplayTempoGlobal(); renderizarGraficoTempoOverlay(); salvarDadosLocais(); }
+        function nextTimerTask() { pauseTimer(); indexCronometro++; carregarTarefaCronometro(); }
+
+        // --- ESTATÍSTICAS E SIMULADOR DE IA ---
+        let simAreaAtual = null; let simTopicoAtual = null; let simModo = 'mix'; let simFila = []; let isGeneratingQuestoes = false;
+        let simRespondidasMix = 0; let simRespondidasSaved = 0; let simTotalSaved = 0;
+
+        function atualizarEstatisticasGlobais() {
+            const edital = bancoDeEditais[editalAtualId]; if(!edital) return; let ac = 0, er = 0; 
+            if(edital.areas) { edital.areas.forEach(a => { if(a && a.sub) a.sub.forEach(s => { ac += (s.acertos||0); er += (s.erros||0); }); }); }
+            if (typeof Chart !== 'undefined') {
+                const canvas = document.getElementById('graficoPizza');
+                if(canvas) {
+                    const ctx = canvas.getContext('2d'); if(window.graficoPizzaObj) window.graficoPizzaObj.destroy(); window.graficoPizzaObj = new Chart(ctx, { type: 'pie', data: { labels: ['Acertos', 'Erros'], datasets: [{ data: [ac, er], backgroundColor: ['#2ecc71', '#e74c3c'], borderColor: 'transparent' }] }, options: { plugins: { legend: { labels: { color: document.body.getAttribute('data-theme') === 'dark' ? '#e3e3e3' : '#2f3640' } } } } });
+                }
+            }
+            const select = document.getElementById('select-disciplina-simulado'); if(select) { select.innerHTML = ''; 
+                if(edital.areas) { edital.areas.forEach(area => { if(area && area.sub && area.sub.length > 0) { const group = document.createElement('optgroup'); group.label = area.nome; area.sub.forEach(sub => { const opt = document.createElement('option'); opt.value = `${area.id}|${sub.id}`; opt.innerText = sub.nome; group.appendChild(opt); }); select.appendChild(group); } }); }
+            }
+        }
+
+        async function iniciarFocusSimulador() { 
+            const select = document.getElementById('select-disciplina-simulado'); 
+            if(!select.value) { alert("Nenhum tópico selecionado."); return; } 
+            
+            const [aId, sId] = select.value.split('|');
+            simAreaAtual = bancoDeEditais[editalAtualId].areas.find(a=>a.id===aId);
+            if(!simAreaAtual) { alert("Erro ao carregar área. Atualize a página."); return; }
+            simTopicoAtual = simAreaAtual.sub.find(s=>s.id===sId);
+            if(!simTopicoAtual) { alert("Erro ao carregar tópico. Atualize a página."); return; }
+
+            const simModoElem = document.querySelector('input[name="sim-modo"]:checked');
+            simModo = simModoElem ? simModoElem.value : 'mix';
+
+            if(!bancoQuestoesLocal[simTopicoAtual.id]) bancoQuestoesLocal[simTopicoAtual.id] = [];
+            simFila = [...bancoQuestoesLocal[simTopicoAtual.id]].sort(() => Math.random() - 0.5);
+
+            if (simModo === 'mix') {
+                simRespondidasMix = 0;
+                if(simFila.length < 15) {
+                    document.getElementById('fullscreen-loader').style.display = 'flex';
+                    document.getElementById('loader-message').innerHTML = 'Conectando ao banco da Banca...<br><span style="font-size: 0.9rem; font-weight: normal; color: #bdc3c7;">Elaborando inéditas com rigor técnico máximo.</span>';
+                    await preencherBufferSimulador(15);
+                    document.getElementById('fullscreen-loader').style.display = 'none';
+                }
+            } else if (simModo === 'saved') {
+                if(simFila.length === 0) { alert("Nenhuma questão salva encontrada para este tópico. Altere o modo para 'Mesclar Inéditas e Salvas'."); return; }
+                simRespondidasSaved = 0;
+                simTotalSaved = simFila.length;
+            }
+
+            document.body.classList.add('focus-mode'); 
+            document.querySelectorAll('.focus-container').forEach(c => c.classList.remove('active-focus')); 
+            
+            document.getElementById('focus-simulador').classList.add('active-focus'); 
+            document.getElementById('btn-floating-music').classList.add('visible'); 
+
+            document.getElementById('simulador-end-screen').style.display = 'none';
+            document.getElementById('sim-info-disciplina').innerText = `SIMULADO: ${simAreaAtual.nome.toUpperCase()}`;
+            document.getElementById('focus-sim-title').innerText = simTopicoAtual.nome;
+            
+            renderizarQuestaoSimulador();
+        }
+
+        async function preencherBufferSimulador(quantidade) {
+            if(isGeneratingQuestoes) return;
+            isGeneratingQuestoes = true;
+            try {
+                const payload = { topico: simTopicoAtual.nome, disciplina: simAreaAtual.nome, quantidade: quantidade };
+                const res = await fetch('http://localhost:3000/api/gerar-questoes', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+                if(res.ok) {
+                    const data = await res.json();
+                    if(data.questoes && data.questoes.length > 0) {
+                        bancoQuestoesLocal[simTopicoAtual.id].push(...data.questoes);
+                        simFila.push(...data.questoes);
+                        salvarDadosLocais();
+                    }
+                }
+            } catch(e) { console.error("Falha ao gerar na API", e); }
+            isGeneratingQuestoes = false;
+        }
+
+        function atualizarUIContador() {
+            const statusEl = document.getElementById('sim-counter-status');
+            if(simModo === 'mix') { statusEl.innerText = `${simRespondidasMix} respondida(s)`; } 
+            else { statusEl.innerText = `${simRespondidasSaved}/${simTotalSaved} respondida(s)`; }
+            statusEl.style.opacity = '1';
+        }
+
+        function toggleEliminateOption(btnElement) {
+            const optionBtn = btnElement.nextElementSibling;
+            btnElement.classList.toggle('eliminated');
+            optionBtn.classList.toggle('eliminated');
+        }
+
+        function renderizarQuestaoSimulador() {
+            document.getElementById('focus-sim-feedback').style.display = 'none';
+            document.getElementById('btn-proxima-questao').style.display = 'none';
+            document.getElementById('btn-pular-questao').style.display = 'inline-block';
+            
+            if (simFila.length === 0) {
+                if(simModo === 'mix') {
+                    document.getElementById('simulador-active').style.display = 'none';
+                    document.getElementById('simulador-loading-inline').style.display = 'block';
+                }
+                return;
+            }
+            
+            document.getElementById('simulador-loading-inline').style.display = 'none';
+            document.getElementById('simulador-active').style.display = 'block';
+            atualizarUIContador();
+
+            const q = simFila[0];
+            document.getElementById('focus-sim-enunciado').innerText = q.enunciado;
+            
+            const optionsContainer = document.getElementById('focus-sim-options');
+            optionsContainer.innerHTML = '';
+            
+            q.alternativas.forEach(alt => {
+                const letra = alt.charAt(0); 
+                optionsContainer.innerHTML += `
+                    <div class="sim-option-wrapper">
+                        <button class="btn-eliminate" onclick="toggleEliminateOption(this)" title="Descartar alternativa">✖</button>
+                        <button class="sim-option-btn" onclick="responderQuestaoSimulador('${letra}', this)">${alt}</button>
+                    </div>
+                `;
+            });
+        }
+
+        function responderQuestaoSimulador(letraSelecionada, btnElement) {
+            const q = simFila[0]; const certa = q.gabarito; const acertou = (letraSelecionada === certa);
+
+            const botoes = document.getElementById('focus-sim-options').querySelectorAll('.sim-option-btn');
+            botoes.forEach(b => {
+                b.disabled = true;
+                b.classList.remove('eliminated'); 
+                if(b.innerText.startsWith(certa)) b.classList.add('sim-option-correct');
+                else if (b === btnElement && !acertou) b.classList.add('sim-option-wrong');
+                else b.style.opacity = '0.5';
+            });
+            
+            const eliminaBotoes = document.getElementById('focus-sim-options').querySelectorAll('.btn-eliminate');
+            eliminaBotoes.forEach(b => { b.disabled = true; b.style.opacity = '0.2'; b.style.cursor = 'default'; });
+
+            if(acertou) simTopicoAtual.acertos++; else simTopicoAtual.erros++;
+            
+            if(simModo === 'mix') simRespondidasMix++; else simRespondidasSaved++;
+            atualizarUIContador();
+            salvarDadosLocais(); 
+
+            if(!acertou) {
+                if(!simTopicoAtual.detalhesErros) simTopicoAtual.detalhesErros = [];
+                const erroMsg = `Você errou um conceito da questão: "${q.enunciado.substring(0, 50)}..." - Revise!`;
+                if(!simTopicoAtual.detalhesErros.includes(erroMsg)) simTopicoAtual.detalhesErros.push(erroMsg);
+                salvarDadosLocais();
+            }
+
+            const feedBox = document.getElementById('focus-sim-feedback'); const feedTitle = document.getElementById('feedback-title'); const feedText = document.getElementById('feedback-text');
+            feedBox.style.display = 'block'; feedBox.style.borderLeftColor = acertou ? 'var(--success)' : 'var(--danger)';
+            feedTitle.innerText = acertou ? "✅ Correto!" : "❌ Incorreto"; feedTitle.style.color = acertou ? 'var(--success)' : 'var(--danger)';
+            feedText.innerHTML = `<strong>Gabarito: ${certa}</strong><br><br>${q.justificativa || 'Nenhuma justificativa fornecida.'}`;
+
+            document.getElementById('btn-pular-questao').style.display = 'none';
+            document.getElementById('btn-proxima-questao').style.display = 'inline-block';
+
+            if (simModo === 'mix' && simFila.length <= 10 && !isGeneratingQuestoes) { preencherBufferSimulador(10); }
+        }
+
+        function proximaQuestaoSimulador() {
+            simFila.shift(); 
+            if (simFila.length === 0 && simModo === 'saved') { mostrarFimSimuladoSalvo(); } 
+            else { renderizarQuestaoSimulador(); }
+        }
+
+        function pularQuestaoSimulador() {
+            const q = simFila.shift(); simFila.push(q); 
+            renderizarQuestaoSimulador();
+            if (simModo === 'mix' && simFila.length <= 10 && !isGeneratingQuestoes) preencherBufferSimulador(10);
+        }
+
+        function mostrarFimSimuladoSalvo() {
+            document.getElementById('simulador-active').style.display = 'none';
+            document.getElementById('simulador-loading-inline').style.display = 'none';
+            document.getElementById('simulador-end-screen').style.display = 'block';
+        }
+
+        function reiniciarSimuladoSalvo() {
+            simFila = [...bancoQuestoesLocal[simTopicoAtual.id]].sort(() => Math.random() - 0.5);
+            simRespondidasSaved = 0;
+            simTotalSaved = simFila.length;
+            document.getElementById('simulador-end-screen').style.display = 'none';
+            renderizarQuestaoSimulador();
+        }
+
+        // --- IA PDF NO BACKEND ---
+        async function analisarPDFReal() {
+            const inputCargo = document.getElementById('inputCargo-ia').value.trim(); const input = document.getElementById('file-input'); 
+            if (!inputCargo) { alert("Por favor, digite o nome exato do cargo antes de analisar o edital."); return; }
+            if (!input.files || input.files.length === 0) { alert("Por favor, selecione um arquivo PDF primeiro."); return; }
+
+            const arquivo = input.files[0]; const formData = new FormData(); formData.append('cargo', inputCargo); formData.append('arquivoPdf', arquivo);
+            const btnGerar = document.getElementById('btn-gerar'); const fullscreenLoader = document.getElementById('fullscreen-loader'); const loaderMessage = document.getElementById('loader-message');
+            btnGerar.style.display = 'none'; fullscreenLoader.style.display = 'flex';
+            loaderMessage.innerHTML = '⏳ A Inteligência Artificial está lendo o PDF, filtrando seu cargo e mapeando as disciplinas...<br><span style="font-size: 0.9rem; font-weight: normal; color: #bdc3c7; display:block; margin-top:10px;">Isso pode levar de 30 a 60 segundos. Não feche a página.</span>';
+
+            try {
+                const response = await fetch('http://localhost:3000/api/analisar-pdf', { method: 'POST', body: formData });
+                if (!response.ok) throw new Error("Erro na comunicação com o servidor.");
+                const editalDaIA = await response.json();
+                fullscreenLoader.style.display = 'none';
+                const novoId = editalDaIA.editalId || 'edital-' + Date.now();
+                bancoDeEditais[novoId] = editalDaIA; ordemEditais.push(novoId); 
+                document.getElementById('file-input').value = ''; document.getElementById('file-name').innerText = ''; document.getElementById('inputCargo-ia').value = ''; document.getElementById('upload-box').style.borderColor = 'var(--border)'; 
+                salvarDadosLocais(); selecionarEdital(novoId); mudarAba('disciplinas', document.getElementById('btn-nav-disciplinas'));
+            } catch (erro) { console.error(erro); fullscreenLoader.style.display = 'none'; alert("Erro ao analisar o PDF. Verifique se o backend está rodando."); btnGerar.style.display = 'block'; }
+        }
+        function arquivoSelecionado() { const input = document.getElementById('file-input'); if (input.files.length > 0) { document.getElementById('file-name').innerText = "Arquivo: " + input.files[0].name; document.getElementById('btn-gerar').style.display = 'block'; document.getElementById('upload-box').style.borderColor = 'var(--success)'; } }
+
+        // --- IA BUSCA RANKING ---
+        let currentRankingParam = null;
+        function buscarConcursoWeb() {
+            const searchInput = document.getElementById('input-busca-concurso').value.trim(); if(!searchInput) { alert("Digite o nome do concurso."); return; }
+            document.getElementById('loader-ranking').style.display = 'block'; document.getElementById('resultado-busca-ia').style.display = 'none';
+            setTimeout(() => {
+                document.getElementById('loader-ranking').style.display = 'none';
+                currentRankingParam = { id: 'sim-' + Date.now(), nome: "Prefeitura de Petrolina - Professor de Geografia (Fev/2026)", pesoGerais: 1, pesoEspecif: 2, totalVagas: 15, notaCorteHist: 85, notaPrimeiroHist: 110 };
+                document.getElementById('resultado-busca-ia').innerHTML = `<div class="ranking-card"><h4>📄 Edital Encontrado e Analisado</h4><p style="color:var(--success); font-weight:bold; margin-top:-5px; font-size:1.1rem;">${currentRankingParam.nome}</p><div class="parameters-grid"><div class="param-item"><span>Peso Conhec. Gerais</span><strong style="color:var(--title-color);">Multiplica por ${currentRankingParam.pesoGerais}</strong></div><div class="param-item"><span>Peso Específicas</span><strong style="color:var(--title-color);">Multiplica por ${currentRankingParam.pesoEspecif}</strong></div><div class="param-item"><span>Nota de Corte Analisada</span><strong style="color:var(--title-color);">${currentRankingParam.notaCorteHist} pontos</strong></div><div class="param-item"><span>Vagas Ofertadas</span><strong style="color:var(--title-color);">${currentRankingParam.totalVagas} vagas</strong></div></div><p style="font-size: 0.9rem; color: var(--text-muted); border-top: 1px dashed var(--border); padding-top: 15px;">Insira seus acertos abaixo:</p><div class="user-input-grid" style="display:flex; gap:10px;"><div class="user-input-group" style="flex:1;"><label style="display:block; color:var(--text-muted); font-weight:bold; margin-bottom:5px;">✅ Acertos Gerais</label><input type="number" id="input-acertos-gerais" onkeydown="if(event.key==='Enter') calcularPosicaoAutomatica()"></div><div class="user-input-group" style="flex:1;"><label style="display:block; color:var(--text-muted); font-weight:bold; margin-bottom:5px;">✅ Acertos Específicas</label><input type="number" id="input-acertos-especif" onkeydown="if(event.key==='Enter') calcularPosicaoAutomatica()"></div></div><button class="btn-primary" style="width: 100%; font-size: 1.1rem; margin-top:15px;" onclick="calcularPosicaoAutomatica()">Cruzar Dados e Ver Colocação 🏆</button><div id="box-resultado-calculo" class="ranking-result-box"></div></div>`;
+                document.getElementById('resultado-busca-ia').style.display = 'block';
+            }, 3000);
+        }
+        function calcularPosicaoAutomatica() {
+            if(!currentRankingParam) return; const acGerais = parseInt(document.getElementById('input-acertos-gerais').value); const acEspec = parseInt(document.getElementById('input-acertos-especif').value);
+            if(isNaN(acGerais) || isNaN(acEspec)) { alert("Preencha a quantidade de acertos."); return; }
+            const notaFinal = (acGerais * currentRankingParam.pesoGerais) + (acEspec * currentRankingParam.pesoEspecif);
+            const resultBox = document.getElementById('box-resultado-calculo'); resultBox.style.display = 'block'; resultBox.className = 'ranking-result-box';
+            const nc = currentRankingParam.notaCorteHist; const nt = currentRankingParam.notaPrimeiroHist; const vg = currentRankingParam.totalVagas;
+            if (notaFinal >= nt) { resultBox.classList.add('res-aprovado'); resultBox.innerHTML = `<span class="medal-icon">🥇</span><strong>FENOMENAL!</strong><br>Sua nota ponderada foi <strong>${notaFinal} pontos</strong>.<br><span style="font-size: 1.5rem;">Sua posição: 1º Lugar</span>`; } 
+            else if (notaFinal >= nc) { const ratio = (nt - notaFinal) / (nt - nc); let pos = Math.round(1 + (vg - 1) * ratio); if(pos < 1) pos = 1; if(pos > vg) pos = vg; resultBox.classList.add('res-aprovado'); resultBox.innerHTML = `<span class="medal-icon">✅</span><strong>DENTRO DAS VAGAS!</strong><br>Sua nota ponderada foi <strong>${notaFinal} pontos</strong>.<br><span style="font-size: 1.5rem;">Sua posição estimada: ${pos}º Lugar</span>`; } 
+            else { const ratio = (nc - notaFinal) / nc; let pos = Math.round(vg + (vg * 10) * ratio); resultBox.classList.add('res-reprovado'); resultBox.innerHTML = `<span class="medal-icon">💪</span><strong>CONTINUE FOCANDO!</strong><br>Sua nota ponderada foi <strong>${notaFinal} pontos</strong>.<br><span style="font-size: 1.2rem;">Sua posição estimada: ~${pos}º Lugar</span><br><span style="font-size: 0.9rem; color: var(--text-muted);">Faltaram apenas ${nc - notaFinal} pontos para o corte.</span>`; }
+        }
+
+    </script>
+</body>
+</html>
