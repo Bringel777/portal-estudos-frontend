@@ -473,7 +473,6 @@
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
     </button>
 
-    <!-- NOVO: BOTÃO TELA CHEIA (FULLSCREEN) -->
     <button id="btn-floating-fullscreen" class="btn-floating-fullscreen" onclick="toggleFullScreen()" title="Tela Cheia">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
@@ -1056,7 +1055,7 @@
             }
         }
 
-        // --- INTEGRAÇÃO SPOTIFY (ATUALIZADA PARA PKCE 2026 E IDLE STATE) ---
+        // --- INTEGRAÇÃO SPOTIFY (ATUALIZADA PARA PKCE E CONEXÃO INDIVIDUAL POR USUÁRIO) ---
         let spotifyAccessToken = null;
         let isSpotifyPlaying = false;
         let spotifyInterval = null;
@@ -1085,7 +1084,6 @@
         }
 
         function setSpotifyIdleState() {
-            // Imagem padrão bonita com o logo do Spotify em vez do ícone quebrado
             document.getElementById('sp-album-art').src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 24 24' fill='%231DB954' opacity='0.5'><path d='M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.586 14.424c-.18.295-.563.387-.857.207-2.35-1.434-5.305-1.76-8.786-.963-.335.077-.67-.133-.746-.467-.077-.334.132-.67.467-.746 3.805-.873 7.077-.5 9.715 1.112.294.18.388.563.207.857zm1.22-3.25c-.226.367-.706.482-1.072.256-2.686-1.65-6.785-2.04-9.965-1.118-.415.12-.854-.116-.96-.53s.116-.853.53-.96c3.676-1.066 8.243-.61 11.26 1.25.368.226.483.705.257 1.072zm.105-3.39c-3.21-1.9-8.494-2.077-11.53-1.15-.494.15-1.01-.13-1.16-.624-.15-.494.13-1.01.624-1.16 3.51-1.07 9.35-.86 13.06 1.14.444.24.593.82.354 1.265-.24.443-.82.593-1.265.354z'/></svg>";
             document.getElementById('sp-track-name').innerText = "Spotify Conectado";
             document.getElementById('sp-artist-name').innerText = "Dê play no app para sincronizar";
@@ -1120,7 +1118,6 @@
                         const data = await response.json();
                         spotifyAccessToken = data.access_token;
                         
-                        // Salva o token AMARRADO a este usuário específico
                         localStorage.setItem(`spotify_token_${userId}`, spotifyAccessToken);
                         localStorage.removeItem('spotify_code_verifier');
                         
@@ -1133,7 +1130,6 @@
                 }
             }
             
-            // Tenta puxar o token exclusivo desse usuário
             const savedToken = localStorage.getItem(`spotify_token_${userId}`);
             if (savedToken) {
                 if(savedToken === 'mock_token') { iniciarSpotifyMock(); return; }
@@ -1188,7 +1184,6 @@
 
         async function fetchSpotifyData() {
             try {
-                // Aumentado o limite de playlists de 10 para 50
                 const res = await fetch('https://api.spotify.com/v1/me/playlists?limit=50', { headers: { Authorization: `Bearer ${spotifyAccessToken}` } });
                 if(!res.ok) throw new Error('Token expirado');
                 const data = await res.json();
@@ -1210,7 +1205,6 @@
             try {
                 const res = await fetch('https://api.spotify.com/v1/me/player/currently-playing', { headers: { Authorization: `Bearer ${spotifyAccessToken}` } });
                 
-                // Se a API retornar 204, significa que não há música tocando agora (Idle State)
                 if(res.status === 204) {
                     setSpotifyIdleState();
                     return;
@@ -1251,7 +1245,6 @@
             try { 
                 const res = await fetch(`https://api.spotify.com/v1/me/player/${endpoint}`, { method: method, headers: { Authorization: `Bearer ${spotifyAccessToken}` } }); 
                 
-                // 404 Not Found ou 403 Forbidden indicam que o Spotify está fechado ou sem aparelho ativo
                 if (res.status === 404 || res.status === 403) {
                     alert("⚠️ AVISO: Abra o aplicativo do Spotify no seu celular ou PC e dê play em qualquer música primeiro para ativar o controle remoto.");
                 }
@@ -1757,7 +1750,7 @@
             }
         }
 
-        // --- CRONÔMETRO ---
+        // --- CRONÔMETRO COM BLINDAGEM DE TEMPO REAL ---
         function iniciarFocusTimer() { 
             filaCronometro = tarefasDoDia.filter(t => !t.concluida && t.tempoMin > 0); 
             if(filaCronometro.length === 0) { alert("Adicione tarefas com tempo para iniciar."); return; } 
@@ -1806,17 +1799,48 @@
 
         function togglePlayPauseTimer() { if(timerRodando) { pauseTimer(); document.getElementById('btn-main-play').innerText = "Retomar"; } else { playTimer(); document.getElementById('btn-main-play').innerText = "Pausar"; } }
         
+        let lastTickTimer = 0; // NOVA VARIÁVEL: Guarda o momento exato em tempo real
+
         function playTimer() { 
-            if(timerRodando || indexCronometro >= filaCronometro.length) return; timerRodando = true; document.getElementById('btn-main-play').innerText = "Pausar";
+            if(timerRodando || indexCronometro >= filaCronometro.length) return; 
+            timerRodando = true; document.getElementById('btn-main-play').innerText = "Pausar";
+            
+            lastTickTimer = Date.now(); // Captura a hora exata do computador no momento do Play
+
             timerInterval = setInterval(() => { 
-                if(tempoRestanteSegundos > 0) { 
-                    tempoRestanteSegundos--; tempoGlobalEstudadoSegundos++; 
-                    const hojeStr = getDataStringLocal(); historicoTempo[hojeStr] = (historicoTempo[hojeStr] || 0) + 1;
-                    atualizarDisplayCronometro(); atualizarDisplayTempoGlobal(); 
-                    try { localStorage.setItem('estudos_historicoTempo', JSON.stringify(historicoTempo)); localStorage.setItem('estudos_tempoGlobal', tempoGlobalEstudadoSegundos.toString()); } catch(e){}
-                } else { 
-                    pauseTimer(); alert("⏰ Tempo concluído!"); tarefasDoDia.find(t => t.id === filaCronometro[indexCronometro].id).concluida = true; 
-                    atualizarDisplayTempoGlobal(); renderizarGraficoTempoOverlay(); salvarDadosLocais(); renderizarTarefasDiaGlobais(); nextTimerTask(); 
+                const agora = Date.now();
+                const deltaSegundos = Math.floor((agora - lastTickTimer) / 1000); // Calcula quantos segundos reais passaram desde o último cálculo
+
+                if (deltaSegundos > 0) { 
+                    // Garante que não desconte mais do que o necessário caso a aba fique dormindo por muito tempo
+                    const segundosDescontar = Math.min(deltaSegundos, tempoRestanteSegundos);
+
+                    if (segundosDescontar > 0) {
+                        tempoRestanteSegundos -= segundosDescontar; 
+                        tempoGlobalEstudadoSegundos += segundosDescontar; 
+                        
+                        const hojeStr = getDataStringLocal(); 
+                        historicoTempo[hojeStr] = (historicoTempo[hojeStr] || 0) + segundosDescontar;
+                        
+                        atualizarDisplayCronometro(); 
+                        atualizarDisplayTempoGlobal(); 
+                        
+                        try { 
+                            localStorage.setItem('estudos_historicoTempo', JSON.stringify(historicoTempo)); 
+                            localStorage.setItem('estudos_tempoGlobal', tempoGlobalEstudadoSegundos.toString()); 
+                        } catch(e){}
+                    }
+
+                    // Sincroniza o tick avançando no tempo, sem perder os milissegundos excedentes
+                    lastTickTimer += deltaSegundos * 1000;
+
+                    // Gatilho de Finalização
+                    if(tempoRestanteSegundos <= 0) { 
+                        pauseTimer(); alert("⏰ Tempo concluído!"); 
+                        tarefasDoDia.find(t => t.id === filaCronometro[indexCronometro].id).concluida = true; 
+                        atualizarDisplayTempoGlobal(); renderizarGraficoTempoOverlay(); salvarDadosLocais(); 
+                        renderizarTarefasDiaGlobais(); nextTimerTask(); 
+                    }
                 } 
             }, 1000); 
         }
