@@ -1442,7 +1442,22 @@
         function selecionarEdital(idEdital) { editalAtualId = idEdital; renderizarMenuEditais(); mudarAba('home'); const titleElem = document.getElementById('titulo-visao-geral'); if(titleElem && bancoDeEditais[idEdital]) titleElem.innerText = `Progresso do Edital: ${bancoDeEditais[idEdital].nome}`; sincronizarTelas(); salvarDadosLocais(); }
         function criarEditalManual() { const novoId = 'edital-' + Date.now(); bancoDeEditais[novoId] = { nome: "Novo Edital", areas: [] }; ordemEditais.push(novoId); selecionarEdital(novoId); setTimeout(() => { const btn = document.querySelector(`.edital-actions .btn-icon[data-edit-id="${novoId}"]`); if(btn) btn.click(); }, 50); }
         function renomearEdital(id, btnElement) { event.stopPropagation(); const textArea = btnElement.closest('.edital-item-container').querySelector('.edital-text-area span'); makeInlineEditable(textArea, bancoDeEditais[id].nome, (newVal) => { bancoDeEditais[id].nome = newVal; renderizarMenuEditais(); if(editalAtualId === id) document.getElementById('titulo-visao-geral').innerText = `Progresso do Edital: ${newVal}`; salvarDadosLocais(); }); }
-        function excluirEdital(id) { if(confirm("Deseja apagar este edital?")) { delete bancoDeEditais[id]; ordemEditais = ordemEditais.filter(e => e !== id); if(editalAtualId === id) selecionarEdital(ordemEditais[0]); else renderizarMenuEditais(); salvarDadosLocais(); } }
+        function excluirEdital(id) { 
+            if(confirm("Deseja apagar este edital?")) { 
+                delete bancoDeEditais[id]; 
+                ordemEditais = ordemEditais.filter(e => e !== id); 
+                if(editalAtualId === id) selecionarEdital(ordemEditais[0]); 
+                else renderizarMenuEditais(); 
+                salvarDadosLocais(); 
+                
+                // NOVO: Avisar a nuvem para apagar o edital!
+                const userStr = localStorage.getItem('estudos_user');
+                if(userStr) {
+                    const userId = JSON.parse(userStr).uid;
+                    fetch(`https://api-portal-estudos.onrender.com/api/editais/${userId}/${id}`, { method: 'DELETE' }).catch(()=>{});
+                }
+            } 
+        }
 
         // --- RENDERIZAÇÃO DA HOME E DISCIPLINAS ---
         function calcularProgressoTopico(sub) {
@@ -1799,20 +1814,19 @@
 
         function togglePlayPauseTimer() { if(timerRodando) { pauseTimer(); document.getElementById('btn-main-play').innerText = "Retomar"; } else { playTimer(); document.getElementById('btn-main-play').innerText = "Pausar"; } }
         
-        let lastTickTimer = 0; // NOVA VARIÁVEL: Guarda o momento exato em tempo real
+        let lastTickTimer = 0;
 
         function playTimer() { 
             if(timerRodando || indexCronometro >= filaCronometro.length) return; 
             timerRodando = true; document.getElementById('btn-main-play').innerText = "Pausar";
             
-            lastTickTimer = Date.now(); // Captura a hora exata do computador no momento do Play
+            lastTickTimer = Date.now(); 
 
             timerInterval = setInterval(() => { 
                 const agora = Date.now();
-                const deltaSegundos = Math.floor((agora - lastTickTimer) / 1000); // Calcula quantos segundos reais passaram desde o último cálculo
+                const deltaSegundos = Math.floor((agora - lastTickTimer) / 1000); 
 
                 if (deltaSegundos > 0) { 
-                    // Garante que não desconte mais do que o necessário caso a aba fique dormindo por muito tempo
                     const segundosDescontar = Math.min(deltaSegundos, tempoRestanteSegundos);
 
                     if (segundosDescontar > 0) {
@@ -1831,10 +1845,8 @@
                         } catch(e){}
                     }
 
-                    // Sincroniza o tick avançando no tempo, sem perder os milissegundos excedentes
                     lastTickTimer += deltaSegundos * 1000;
 
-                    // Gatilho de Finalização
                     if(tempoRestanteSegundos <= 0) { 
                         pauseTimer(); alert("⏰ Tempo concluído!"); 
                         tarefasDoDia.find(t => t.id === filaCronometro[indexCronometro].id).concluida = true; 
