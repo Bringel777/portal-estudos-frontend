@@ -6,41 +6,96 @@
     <title>Plataforma de Estudos Avançada</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        /* VARIÁVEIS DE CORES */
         :root {
-            --sidebar-bg: #1e272e; --secondary: #0fb9b1; --accent: #f39c12; --success: #20bf6b; 
-            --danger: #eb3b5a; --bg: #f1f2f6; --card-bg: #ffffff; --text: #2f3640;
-            --title-color: #1e272e; --text-muted: #7f8c8d; --border: #e1e8ed;
-            --hover-bg: #f8f9fa; --progress-bg: #e1e8ed; --info-bg: rgba(15, 185, 177, 0.1);
+            --sidebar-bg: #1e272e;
+            --secondary: #0fb9b1;
+            --accent: #f39c12;
+            --success: #20bf6b; 
+            --danger: #eb3b5a;
+            --bg: #f1f2f6;
+            --card-bg: #ffffff;
+            --text: #2f3640;
+            --title-color: #1e272e;
+            --text-muted: #7f8c8d;
+            --border: #e1e8ed;
+            --hover-bg: #f8f9fa;
+            --progress-bg: #e1e8ed;
+            --info-bg: rgba(15, 185, 177, 0.1);
         }
+
+        /* TEMA ESCURO */
         [data-theme="dark"] {
-            --sidebar-bg: #131314; --secondary: #21c9c0; --accent: #f5b041; --success: #2ecc71;
-            --danger: #ff5252; --bg: #000000; --card-bg: #1e1e1e; --text: #e3e3e3;
-            --title-color: #ffffff; --text-muted: #9ba1a6; --border: #333333;
-            --hover-bg: #282828; --progress-bg: #333333; --info-bg: rgba(33, 201, 192, 0.1);
+            --sidebar-bg: #131314;
+            --secondary: #21c9c0; 
+            --accent: #f5b041;
+            --success: #2ecc71;
+            --danger: #ff5252;
+            --bg: #000000;
+            --card-bg: #1e1e1e;
+            --text: #e3e3e3;
+            --title-color: #ffffff;
+            --text-muted: #9ba1a6;
+            --border: #333333;
+            --hover-bg: #282828;
+            --progress-bg: #333333;
+            --info-bg: rgba(33, 201, 192, 0.1);
         }
+
         * { box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; display: flex; height: 100vh; overflow: hidden; transition: background-color 0.4s ease, color 0.4s ease; }
-        .card, .area-card, .sub-item-card, input, select, .sidebar, .task-item, .accordion-content { transition: background-color 0.4s ease, border-color 0.4s ease, color 0.4s ease; }
-        .inline-edit-input { width: 100%; padding: 4px 8px; border: 2px solid var(--secondary); border-radius: 4px; font-family: inherit; font-size: inherit; color: var(--title-color); background: var(--card-bg); outline: none; box-shadow: 0 0 5px rgba(15, 185, 177, 0.3); flex: 1; }
-        .sidebar { width: 270px; background-color: var(--sidebar-bg); color: white; display: flex; flex-direction: column; transition: width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); z-index: 100; flex-shrink: 0; height: 100vh; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            transition: background-color 0.4s ease, color 0.4s ease;
+        }
+
+        .card, .area-card, .sub-item-card, input, select, .sidebar, .task-item, .accordion-content {
+            transition: background-color 0.4s ease, border-color 0.4s ease, color 0.4s ease;
+        }
+
+        .inline-edit-input {
+            width: 100%; padding: 4px 8px; border: 2px solid var(--secondary); border-radius: 4px;
+            font-family: inherit; font-size: inherit; color: var(--title-color); background: var(--card-bg);
+            outline: none; box-shadow: 0 0 5px rgba(15, 185, 177, 0.3); flex: 1;
+        }
+
+        /* MENU LATERAL FIXO */
+        .sidebar {
+            width: 270px; background-color: var(--sidebar-bg); color: white; display: flex; flex-direction: column; 
+            transition: width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); z-index: 100; flex-shrink: 0; height: 100vh;
+        }
+        
         .sidebar-header { display: flex; align-items: center; padding: 20px; gap: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .hamburger-btn { background: none; border: none; color: white; cursor: pointer; padding: 5px; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
         .hamburger-btn:hover { opacity: 0.7; }
         .sidebar h2 { margin: 0; font-size: 1.25rem; white-space: nowrap; color: white; transition: opacity 0.3s; }
+
         .sidebar.recolhido { width: 80px; }
         .sidebar.recolhido .sidebar-header { padding: 20px 0; justify-content: center; }
-        .sidebar.recolhido h2, .sidebar.recolhido .nav-btn-text, .sidebar.recolhido .menu-title, .sidebar.recolhido .switch-container, .sidebar.recolhido .edital-text-area, .sidebar.recolhido .edital-actions, .sidebar.recolhido .drag-handle { display: none; opacity: 0; }
-        .sidebar.recolhido .nav-btn, .sidebar.recolhido .edital-item-container { justify-content: center; padding: 15px 0; }
+        .sidebar.recolhido h2 { display: none; opacity: 0; }
+        .sidebar.recolhido .nav-btn-text, .sidebar.recolhido .menu-title, .sidebar.recolhido .switch-container { display: none; }
+        .sidebar.recolhido .nav-btn { justify-content: center; padding: 15px 0; }
+        .sidebar.recolhido .edital-item-container { padding: 15px 0; justify-content: center; }
+        .sidebar.recolhido .edital-text-area, .sidebar.recolhido .edital-actions, .sidebar.recolhido .drag-handle { display: none; }
         .sidebar.recolhido .icon-svg { margin: 0; }
+
         .nav-btn { background: none; border: none; color: #bdc3c7; padding: 15px 20px; text-align: left; font-size: 0.95rem; cursor: pointer; transition: 0.3s; border-left: 4px solid transparent; display: flex; align-items: center; gap: 12px; width: 100%; }
         .nav-btn:hover { background-color: rgba(255,255,255,0.05); color: white; }
         .nav-btn.active { background-color: rgba(255,255,255,0.1); color: white; border-left-color: var(--secondary); font-weight: bold; }
         .icon-svg { width: 22px; height: 22px; flex-shrink: 0; opacity: 0.8; }
         .nav-btn:hover .icon-svg, .nav-btn.active .icon-svg { opacity: 1; }
+
         .menu-section { border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; flex: 1; overflow-y: auto; min-height: 0; }
         .menu-section::-webkit-scrollbar { width: 6px; }
         .menu-section::-webkit-scrollbar-thumb { background-color: rgba(255,255,255,0.1); border-radius: 10px; }
         .menu-title { color: #95a5a6; font-size: 0.75rem; padding: 0 20px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; white-space: nowrap;}
+        
         .switch-container { display: flex; align-items: center; gap: 12px; margin-top: 10px; padding: 0 20px; }
         .switch-label { font-size: 0.75rem; color: #bdc3c7; line-height: 1.3; flex: 1; }
         .switch { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
@@ -49,6 +104,7 @@
         .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2);}
         input:checked + .slider { background-color: var(--success); border-color: var(--success); }
         input:checked + .slider:before { transform: translateX(20px); }
+
         .edital-item-container { display: flex; align-items: center; justify-content: space-between; padding: 10px 15px 10px 10px; margin-bottom: 2px; color: #bdc3c7; border-left: 4px solid transparent; transition: 0.2s; cursor: pointer; }
         .edital-item-container.active-sub { background-color: rgba(255,255,255,0.1); color: white; border-left-color: var(--accent); font-weight: bold; }
         .edital-item-container:hover { background-color: rgba(255,255,255,0.05); color: white; }
@@ -58,6 +114,8 @@
         .edital-text-area { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.9rem; display: flex; align-items: center; gap: 8px;}
         .edital-actions { display: flex; gap: 5px; opacity: 0; transition: 0.2s; }
         .edital-item-container:hover .edital-actions { opacity: 1; }
+
+        /* PERFIL DO USUÁRIO NA BARRA LATERAL */
         .sidebar-profile { display: flex; align-items: center; gap: 12px; padding: 15px 20px; border-top: 1px solid rgba(255,255,255,0.05); margin-top: 15px; transition: 0.3s; }
         .profile-avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.1); flex-shrink: 0; }
         .profile-info { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
@@ -68,17 +126,21 @@
         .btn-logout:hover { background: rgba(235, 59, 90, 0.15); color: var(--danger); }
         .sidebar.recolhido .sidebar-profile { padding: 15px 0; justify-content: center; border-top: none; }
         .sidebar.recolhido .profile-info, .sidebar.recolhido .btn-logout { display: none; }
+
+        /* CONTEÚDO PRINCIPAL */
         .main-content { flex: 1; padding: 30px 40px; overflow-y: auto; height: 100vh; position: relative;}
         .tab-content { display: none; animation: fadeIn 0.4s ease; }
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes zoomIn { 0% { opacity: 0; transform: scale(0.96); } 100% { opacity: 1; transform: scale(1); } }
         #ambiente-topico.active { animation: zoomIn 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+
         .card { background: var(--card-bg); padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 20px; border: 1px solid var(--border); }
         .card-header-flex { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--secondary); padding-bottom: 15px; margin-bottom: 20px; }
         h3 { margin: 0; color: var(--title-color); transition: color 0.4s; font-size: 1.3rem; }
         .btn-outline { background: transparent; border: 1px solid var(--secondary); color: var(--secondary); padding: 6px 16px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; font-weight: bold; transition: 0.2s;}
         .btn-outline:hover { background: var(--secondary); color: white; }
+
         .progress-container { margin-bottom: 20px; }
         .progress-header { display: flex; justify-content: space-between; font-size: 1.05rem; margin-bottom: 8px; font-weight: bold;}
         .progress-bar-bg { width: 100%; background-color: var(--progress-bg); border-radius: 8px; overflow: hidden; height: 16px;}
@@ -90,6 +152,7 @@
         .mini-bar-title { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; justify-content: space-between;}
         .mini-bar-bg { width: 100%; background: var(--progress-bg); height: 8px; border-radius: 4px; overflow: hidden;}
         .mini-bar-fill { height: 100%; transition: width 0.5s; }
+
         .area-card { background: var(--card-bg); border: 1px solid var(--border); border-left: 5px solid var(--secondary); margin-bottom: 20px; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.02);}
         .area-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--hover-bg); border-bottom: 1px solid var(--border); }
         .sub-list { padding: 10px 20px 20px 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 15px; }
@@ -104,6 +167,7 @@
         .btn-add-area:hover { background: #0c9c95; }
         .btn-add-sub { margin: 0 20px 20px 20px; padding: 10px 20px; background: var(--hover-bg); color: var(--title-color); border: 1px dashed var(--border); border-radius: 6px; cursor: pointer; font-size: 0.95rem; font-weight: bold; transition: 0.2s;}
         .btn-add-sub:hover { background: var(--border); }
+
         .time-panel-wrapper { position: relative; display: flex; flex-direction: column; background-color: var(--sidebar-bg); border-radius: 14px; overflow: hidden; margin-bottom: 20px; min-height: 220px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         .time-panel-content { position: relative; z-index: 2; padding: 25px 30px; display: flex; flex-direction: column; align-items: center; width: 100%; }
         .time-panel-controls { width: 100%; display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
@@ -115,6 +179,7 @@
         .time-panel-main h4 { margin: 0 0 5px 0; font-size: 1.15rem; font-weight: normal; color: rgba(255,255,255,0.8);}
         .time-huge { font-size: 4.5rem; font-weight: 200; font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-variant-numeric: tabular-nums; letter-spacing: -2px; color: white; text-shadow: 0 4px 20px rgba(0,0,0,0.2); line-height: 1; }
         .chart-tempo-overlay { position: absolute; bottom: 0; left: 0; width: 100%; height: 75%; z-index: 1; pointer-events: none; opacity: 0.85; }
+
         .schedule-list { list-style: none; padding: 0; margin: 0; }
         .task-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid var(--border); background: var(--card-bg); border-radius: 6px; margin-bottom: 10px; transition: 0.3s; border-left: 5px solid transparent; }
         .task-content { display: flex; align-items: center; gap: 12px; flex: 1; }
@@ -126,19 +191,23 @@
         .btn-icon:hover { opacity: 1; transform: scale(1.1); }
         .color-picker { width: 28px; height: 28px; padding: 0; border: none; border-radius: 50%; cursor: pointer; background: transparent; }
         .color-picker::-webkit-color-swatch { border: none; border-radius: 50%; }
+
         @keyframes pulseAlert { 0% { box-shadow: 0 0 0 0 rgba(235, 59, 90, 0.4); border-color: var(--danger); } 70% { box-shadow: 0 0 0 10px rgba(235, 59, 90, 0); border-color: var(--danger); } 100% { box-shadow: 0 0 0 0 rgba(235, 59, 90, 0); border-color: var(--danger); } }
         .revisao-urgente { animation: pulseAlert 2s infinite !important; border-color: var(--danger) !important;}
         .text-urgente { color: var(--danger) !important; font-weight: bold; }
         .bg-urgente { background: var(--danger) !important; }
+
         .btn-expand { background-color: var(--hover-bg); color: var(--title-color); border: 1px solid var(--border); padding: 12px 20px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 15px; transition: 0.2s;}
         .weekly-schedule-modal { background: var(--hover-bg); padding: 20px; border-radius: 8px; margin-top: 10px; border: 1px dashed var(--border); }
         .accordion-header { background-color: var(--hover-bg); color: var(--title-color); font-weight: bold; border: 1px solid var(--border); padding: 15px; width: 100%; text-align: left; cursor: pointer; border-radius: 8px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center;}
         .accordion-content { display: none; padding: 15px; border: 1px solid var(--border); border-top: none; border-radius: 0 0 8px 8px; background: var(--card-bg); }
         .btn-primary { background-color: var(--secondary); color: white; border: none; padding: 12px 25px; border-radius: 6px; font-size: 1rem; cursor: pointer; font-weight: bold; transition: 0.2s;}
         .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+
         .ambiente-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; border-bottom: 2px solid var(--secondary); padding-bottom: 20px;}
         .ambiente-title { margin: 0; font-size: 2rem; color: var(--title-color); }
         .ambiente-area-name { font-size: 0.95rem; color: var(--text-muted); text-transform: uppercase; font-weight: bold; letter-spacing: 1px; margin-bottom: 5px;}
+        
         .amb-sugestoes-lista { max-height: 120px; overflow-y: auto; padding-right: 10px; list-style: none; margin: 0; padding-left: 0; }
         .amb-sugestoes-lista::-webkit-scrollbar { width: 6px; }
         .amb-sugestoes-lista::-webkit-scrollbar-thumb { background: rgba(235, 59, 90, 0.3); border-radius: 10px; }
@@ -146,6 +215,7 @@
         .sugestao-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0;}
         .btn-del-sugestao { background: rgba(235, 59, 90, 0.1); color: var(--danger); border: none; border-radius: 5px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; flex-shrink: 0; margin-left: 10px; }
         .btn-del-sugestao:hover { background: rgba(235, 59, 90, 0.2); }
+
         .ranking-card { border: 1px solid var(--border); border-radius: 12px; padding: 25px; background: var(--card-bg); margin-bottom: 20px; border-left: 5px solid #3498db; }
         .ranking-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px dashed var(--border); padding-bottom: 15px; }
         .ranking-params { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; background: var(--hover-bg); padding: 20px; border-radius: 10px; }
@@ -155,6 +225,7 @@
         .ranking-result-box { margin-top: 20px; padding: 20px; border-radius: 10px; text-align: center; font-size: 1.2rem; display: none; animation: fadeIn 0.5s; }
         .res-aprovado { background: rgba(32, 191, 107, 0.1); color: var(--success); border: 2px solid var(--success); }
         .res-reprovado { background: rgba(235, 59, 90, 0.1); color: var(--danger); border: 2px solid var(--danger); }
+        
         .ia-search-bar { display: flex; border: 2px solid var(--secondary); border-radius: 8px; overflow: hidden; margin-bottom: 30px; }
         .ia-search-bar input { flex: 1; padding: 18px; border: none; font-size: 1.1rem; outline: none; border-radius: 0;}
         .ia-search-bar button { background: var(--secondary); color: white; border: none; padding: 0 30px; font-weight: bold; cursor: pointer; font-size: 1.1rem; transition: 0.2s; }
@@ -162,6 +233,7 @@
         .upload-area { border: 2px dashed var(--border); padding: 50px; text-align: center; border-radius: 12px; cursor: pointer; transition: 0.3s; background-color: var(--hover-bg);}
         .upload-area:hover { border-color: var(--secondary); background: var(--info-bg);}
         .btn-ia { background-color: #8e44ad; color: white; border: none; padding: 18px 30px; border-radius: 8px; font-size: 1.2rem; cursor: pointer; margin-top: 25px; font-weight: bold; width: 100%; transition: 0.2s;}
+        
         #fullscreen-loader { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(12px); z-index: 99999; flex-direction: column; align-items: center; justify-content: center; }
         .spinner { width: 80px; height: 80px; border: 6px solid rgba(255,255,255,0.1); border-top-color: var(--secondary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 25px; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
@@ -180,6 +252,7 @@
         .login-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; padding: 50px 40px; text-align: center; max-width: 420px; width: 90%; box-shadow: 0 30px 60px rgba(0,0,0,0.5); display: flex; flex-direction: column; align-items: center; }
         .login-title { color: white; font-size: 2.2rem; font-weight: bold; margin: 0 0 10px 0; letter-spacing: -1px; }
         .login-subtitle { color: rgba(255,255,255,0.6); font-size: 1rem; margin-bottom: 40px; line-height: 1.5; }
+        
         .btn-auth { width: 100%; display: flex; align-items: center; justify-content: center; gap: 12px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: white; padding: 15px; border-radius: 12px; font-size: 1.05rem; font-weight: 500; cursor: pointer; transition: all 0.2s; margin-bottom: 15px; }
         .btn-auth:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.2); transform: translateY(-2px); }
         .btn-auth svg { width: 24px; height: 24px; }
@@ -187,7 +260,9 @@
         body.focus-mode .sidebar { width: 0; padding: 0; overflow: hidden; opacity: 0; }
         body.focus-mode .main-content { padding: 40px 10%; display: flex; justify-content: center; align-items: center; background: transparent; }
         body.focus-mode .tab-content { display: none !important; }
+
         .focus-container { display: none; width: 100%; max-width: 600px; background: rgba(25, 25, 30, 0.6); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; padding: 40px; box-shadow: 0 30px 60px rgba(0,0,0,0.5); color: white; position: relative;}
+        
         body.focus-mode .focus-container.active-focus { display: block; animation: fadeIn 0.5s ease; }
         body.focus-mode #focus-simulador.active-focus { display: flex; } 
 
@@ -297,7 +372,6 @@
         <div class="aura-blob aura-3"></div>
     </div>
 
-    <!-- TELA DE LOGIN OVERLAY (FIREBASE OFICIAL) -->
     <div id="login-overlay">
         <div class="aura-blob aura-1" style="z-index:-1; opacity: 0.6;"></div>
         <div class="aura-blob aura-2" style="z-index:-1; opacity: 0.6;"></div>
@@ -318,7 +392,6 @@
         </div>
     </div>
 
-    <!-- OVERLAY DE CARREGAMENTO -->
     <div id="fullscreen-loader">
         <div class="spinner"></div>
         <div class="loader-text" id="loader-message">Aguarde...</div>
@@ -391,7 +464,6 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
             </button>
         </div>
-
     </nav>
 
     <!-- BOTÕES FLUTUANTES UNIVERSAIS NO MODO FOCO -->
@@ -421,7 +493,7 @@
         </svg>
     </button>
 
-    <!-- PAINEL LATERAL DE TAREFAS -->
+    <!-- PAINEL DE TAREFAS -->
     <div id="glass-task-panel" class="glass-task-panel">
         <div class="glass-panel-header">
             <button class="btn-close-glass-panel" onclick="toggleFocusTasks()" title="Esconder Tarefas">
@@ -436,7 +508,7 @@
         <ul id="focus-task-list" class="focus-task-list"></ul>
     </div>
 
-    <!-- PAINEL LATERAL DE MÚSICA (SPOTIFY) -->
+    <!-- PAINEL DE MÚSICA -->
     <div id="glass-music-panel" class="glass-task-panel">
         <div class="glass-panel-header">
             <button class="btn-close-glass-panel" onclick="toggleFocusMusic()" title="Esconder Música">
@@ -448,12 +520,10 @@
             </h3>
             <div style="width: 36px;"></div>
         </div>
-
         <div id="spotify-login-screen" style="text-align: center; margin-top: 50px;">
             <p style="color: rgba(255,255,255,0.7); margin-bottom: 25px; line-height: 1.5;">Conecte sua conta do Spotify para ouvir suas playlists de foco sem sair da plataforma.</p>
             <button class="btn-primary" style="background: #1DB954; color: black; border-radius: 50px; font-weight: bold; width: 100%; padding: 15px;" onclick="connectSpotify()">Conectar ao Spotify</button>
         </div>
-
         <div id="spotify-player-screen" style="display: none; flex-direction: column; height: 100%;">
             <div class="spotify-player-container">
                 <img id="sp-album-art" src="" class="spotify-album-art">
@@ -467,15 +537,13 @@
                     <button class="btn-spotify-ctrl" onclick="spotifyAction('next')">⏭</button>
                 </div>
             </div>
-            
             <h4 style="margin: 25px 0 10px 0; font-size: 1.1rem; color: rgba(255,255,255,0.9); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">Suas Playlists</h4>
-            <div id="sp-playlists-container" class="spotify-playlists amb-sugestoes-lista" style="max-height: calc(100vh - 450px);">
-            </div>
+            <div id="sp-playlists-container" class="spotify-playlists amb-sugestoes-lista" style="max-height: calc(100vh - 450px);"></div>
             <button class="btn-skip-subtle" style="margin-top:auto;" onclick="disconnectSpotify()">Desconectar Conta</button>
         </div>
     </div>
 
-    <!-- NOVO PAINEL LATERAL DO BLOCO DE NOTAS -->
+    <!-- PAINEL DE NOTAS -->
     <div id="glass-note-panel" class="glass-task-panel">
         <div class="glass-panel-header">
             <button class="btn-close-glass-panel" onclick="toggleFocusNotes()" title="Esconder Anotações">
@@ -487,7 +555,6 @@
             </h3>
             <div style="width: 36px;"></div>
         </div>
-
         <div style="display: flex; gap: 15px; margin-bottom: 15px; color: rgba(255,255,255,0.8); font-size: 0.9rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px;">
             <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;" title="Anota e salva na página do tópico atual">
                 <input type="radio" name="note-type" value="topic" checked onchange="switchNoteType()" style="width:16px; height:16px; margin:0;"> 
@@ -498,13 +565,11 @@
                 <span>Geral (Pág. Inicial)</span>
             </label>
         </div>
-
         <textarea id="focus-note-textarea" placeholder="Digite suas anotações aqui..." style="flex: 1; width: 100%; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: white; padding: 15px; font-family: inherit; font-size: 1rem; resize: none; outline: none;"></textarea>
     </div>
 
-    <!-- ÚNICO CONTEÚDO PRINCIPAL DA PLATAFORMA -->
+    <!-- CONTEÚDO PRINCIPAL -->
     <main class="main-content">
-
         <!-- ABA 1: VISÃO GERAL -->
         <section id="home" class="tab-content active">
             <div class="card">
@@ -556,7 +621,6 @@
                 <div id="weekly-schedule-container" style="display: none;"></div>
             </div>
 
-            <!-- NOVO BLOCO DE ANOTAÇÕES GERAIS -->
             <div class="card">
                 <div class="card-header-flex" style="border-bottom: 1px solid var(--border); margin-bottom: 15px; padding-bottom: 10px;">
                     <h3 style="border:none; margin:0; padding:0;">Anotações Gerais (Modo Foco)</h3>
@@ -593,7 +657,6 @@
                 <button id="btn-toggle-concluido" class="btn-primary" style="background: var(--success);" onclick="alternarConclusaoTopicoAtual()">Marcar como Concluído ✅</button>
             </div>
 
-            <!-- BLOCO DE REVISÃO -->
             <div class="card" id="card-revisao-espacada" style="border: 1px solid var(--border); border-left: 5px solid var(--accent);">
                 <h3 style="color: var(--accent); margin-bottom: 15px; border-bottom: 1px solid var(--border);">⏰ Revisão Espaçada e Inteligente</h3>
                 <div style="background: rgba(235, 59, 90, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
@@ -636,7 +699,6 @@
                 <button class="btn-primary" style="font-size: 1.2rem; padding: 15px 40px; margin-top: 10px;" onclick="iniciarFocusTimer()">⏱️ Iniciar Rotina de Foco</button>
             </div>
 
-            <!-- NOVO BLOCO DE ANOTAÇÕES DO TÓPICO -->
             <div class="card" style="border: 1px solid var(--border);">
                 <div class="card-header-flex" style="border-bottom: 1px solid var(--border); margin-bottom: 15px; padding-bottom: 10px;">
                     <h3 style="border: none; margin: 0; font-size: 1.2rem;">Minhas anotações do modo foco</h3>
@@ -734,6 +796,7 @@
             </div>
         </section>
 
+        <!-- TELAS DE FOCO -->
         <div id="focus-timer" class="focus-container" style="text-align: center;">
             <div class="current-task-label" id="timer-task-name">Preparando...</div>
             <div class="circular-timer">
@@ -776,11 +839,14 @@
 
             <div id="simulador-active">
                 <p id="focus-sim-enunciado" style="font-size: 1.15rem; line-height: 1.6; margin-bottom: 25px; color: white; text-align: justify;">Carregando questão...</p>
+                
                 <div id="focus-sim-options" style="display: flex; flex-direction: column;"></div>
+
                 <div id="focus-sim-feedback" style="display: none; margin-top: 25px; padding: 20px; border-radius: 12px; border-left: 5px solid transparent; background: rgba(255,255,255,0.05);">
                     <h4 id="feedback-title" style="margin: 0 0 10px 0; font-size: 1.2rem;">Resultado</h4>
                     <p id="feedback-text" style="margin: 0; color: rgba(255,255,255,0.8); font-size: 0.95rem; line-height: 1.5;"></p>
                 </div>
+
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 25px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
                     <button id="btn-pular-questao" class="btn-skip-subtle" style="margin: 0;" onclick="pularQuestaoSimulador()">Pular Questão ⏭</button>
                     <button id="btn-proxima-questao" class="btn-primary" style="display: none; padding: 12px 30px; font-size: 1.1rem; border-radius: 50px;" onclick="proximaQuestaoSimulador()">Próxima Questão ➔</button>
@@ -1201,67 +1267,6 @@
         function deletarTarefaSemana(dia, id) { tarefasDaSemana[dia] = tarefasDaSemana[dia].filter(t => t.id !== id); salvarDadosLocais(); renderizarTarefasSemana(); }
         function adicionarTarefaSemana(diaId) { const input = document.getElementById('input-' + diaId); if (input.value.trim() !== '') { if(!tarefasDaSemana[diaId]) tarefasDaSemana[diaId] = []; tarefasDaSemana[diaId].push({ id: 'w'+Date.now(), texto: input.value.trim(), concluida: false, cor: '#0fb9b1' }); input.value = ''; salvarDadosLocais(); renderizarTarefasSemana(); } }
 
-        let filaCronometro = []; let indexCronometro = 0; let timerInterval = null; let tempoRestanteSegundos = 0; let timerRodando = false; let tempoTotalDaTarefaAtual = 0;
-        
-        function sairModoFocoGlobal() { 
-            try { pauseTimer(); } catch(e) {}
-            if(isSpotifyPlaying) { try { spotifyAction('pause'); } catch(e){} }
-            document.body.classList.remove('focus-mode'); 
-            document.querySelectorAll('.focus-container').forEach(c => c.classList.remove('active-focus')); 
-            const pTask = document.getElementById('glass-task-panel'); if(pTask) pTask.classList.remove('active');
-            const pMusic = document.getElementById('glass-music-panel'); if(pMusic) pMusic.classList.remove('active');
-            const pNote = document.getElementById('glass-note-panel'); if(pNote) { saveFocusNote(); pNote.classList.remove('active'); }
-            const btnFloat = document.getElementById('btn-floating-tasks'); if(btnFloat) btnFloat.classList.remove('visible');
-            const btnMusic = document.getElementById('btn-floating-music'); if(btnMusic) btnMusic.classList.remove('visible');
-            const btnFull = document.getElementById('btn-floating-fullscreen'); if(btnFull) btnFull.classList.remove('visible');
-            const btnNote = document.getElementById('btn-floating-notes'); if(btnNote) btnNote.classList.remove('visible');
-            if (document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.msFullscreenElement) { if (document.exitFullscreen) document.exitFullscreen().catch(()=>{}); else if (document.msExitFullscreen) document.msExitFullscreen(); else if (document.mozCancelFullScreen) document.mozCancelFullScreen(); else if (document.webkitExitFullscreen) document.webkitExitFullscreen(); }
-            try { atualizarDisplayTempoGlobal(); renderizarGraficoTempoOverlay(); atualizarEstatisticasGlobais(); salvarDadosLocais(); sincronizarTelas(); } catch(e) {}
-        }
-
-        function toggleFocusTasks() { const panel = document.getElementById('glass-task-panel'); const pMusic = document.getElementById('glass-music-panel'); const pNote = document.getElementById('glass-note-panel'); if (panel.classList.contains('active')) { panel.classList.remove('active'); } else { if(pMusic) pMusic.classList.remove('active'); if(pNote) { saveFocusNote(); pNote.classList.remove('active'); } panel.classList.add('active'); renderizarFilaTarefasFoco(); } }
-        function toggleFocusMusic() { const panel = document.getElementById('glass-music-panel'); const pTask = document.getElementById('glass-task-panel'); const pNote = document.getElementById('glass-note-panel'); if (panel.classList.contains('active')) { panel.classList.remove('active'); } else { if(pTask) pTask.classList.remove('active'); if(pNote) { saveFocusNote(); pNote.classList.remove('active'); } panel.classList.add('active'); } }
-        function toggleFocusNotes() { const panel = document.getElementById('glass-note-panel'); const pTask = document.getElementById('glass-task-panel'); const pMusic = document.getElementById('glass-music-panel'); if (panel.classList.contains('active')) { saveFocusNote(); panel.classList.remove('active'); } else { if(pTask) pTask.classList.remove('active'); if(pMusic) pMusic.classList.remove('active'); panel.classList.add('active'); switchNoteType(); } }
-
-        function iniciarFocusTimer() { 
-            filaCronometro = tarefasDoDia.filter(t => !t.concluida && t.tempoMin > 0); 
-            if(filaCronometro.length === 0) { alert("Adicione tarefas com tempo para iniciar."); return; } 
-            indexCronometro = 0; document.body.classList.add('focus-mode'); 
-            document.querySelectorAll('.focus-container').forEach(c => c.classList.remove('active-focus')); 
-            document.getElementById('focus-timer').classList.add('active-focus'); 
-            document.getElementById('btn-floating-tasks').classList.add('visible'); 
-            document.getElementById('btn-floating-music').classList.add('visible');
-            document.getElementById('btn-floating-fullscreen').classList.add('visible');
-            document.getElementById('btn-floating-notes').classList.add('visible');
-            switchNoteType(); carregarTarefaCronometro(); 
-        }
-
-        function renderizarFilaTarefasFoco() { const list = document.getElementById('focus-task-list'); if(!list) return; list.innerHTML = ''; if (filaCronometro.length === 0) { list.innerHTML = `<div style="text-align: center; color: rgba(255,255,255,0.5); margin-top: 50px;"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:15px; opacity:0.6;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg><p>Ainda não há tarefas — adicione uma acima para manter o foco.</p></div>`; return; } filaCronometro.forEach((t, i) => { const li = document.createElement('li'); li.className = 'focus-task-item'; li.dataset.taskId = t.id; if(i === indexCronometro) li.classList.add('current'); else if (i < indexCronometro) li.style.opacity = '0.4'; li.innerHTML = `<div style="display:flex; align-items:center; gap: 10px; flex:1;"><span>${i === indexCronometro ? '▶ ' : ''}</span><span class="focus-task-text" style="flex:1;">${t.texto}</span></div><div style="display:flex; align-items:center; gap: 8px;"><span style="font-size:0.85rem; opacity:0.8; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;">${t.tempoMin}m</span><button class="btn-icon btn-edit-inline" style="color:white; font-size:1rem; padding:0;" onclick="editarTarefaFoco('${t.id}', this)">✏️</button></div>`; list.appendChild(li); }); }
-        function editarTarefaFoco(id, btnElement) { const spanElement = btnElement.closest('.focus-task-item').querySelector('.focus-task-text'); const t = filaCronometro.find(t => t.id === id); makeInlineEditable(spanElement, t.texto, (newVal) => { t.texto = newVal; const globalTask = tarefasDoDia.find(gt => gt.id === id); if(globalTask) globalTask.texto = newVal; salvarDadosLocais(); renderizarTarefasDiaGlobais(); renderizarFilaTarefasFoco(); if(filaCronometro[indexCronometro] && filaCronometro[indexCronometro].id === id) { document.getElementById('timer-task-name').innerText = newVal; } }); }
-        function adicionarTarefaFocoRapida() { const novoId = 't' + Date.now(); const novaTarefa = { id: novoId, texto: "Nova Tarefa", concluida: false, tempoMin: 25, cor: '#0fb9b1' }; tarefasDoDia.push(novaTarefa); filaCronometro.push(novaTarefa); salvarDadosLocais(); renderizarTarefasDiaGlobais(); renderizarFilaTarefasFoco(); setTimeout(() => { const btn = document.querySelector(`.focus-task-item[data-task-id="${novoId}"] .btn-edit-inline`); if(btn) btn.click(); }, 50); }
-        function carregarTarefaCronometro() { if(indexCronometro >= filaCronometro.length) { document.getElementById('timer-task-name').innerText = "🎉 Rotina Concluída!"; document.getElementById('timer-display').innerText = "00:00"; document.getElementById('btn-main-play').style.display = 'none'; return; } document.getElementById('btn-main-play').style.display = 'inline-block'; const t = filaCronometro[indexCronometro]; document.getElementById('timer-task-name').innerText = t.texto; tempoTotalDaTarefaAtual = t.tempoMin * 60; tempoRestanteSegundos = tempoTotalDaTarefaAtual; renderizarFilaTarefasFoco(); atualizarDisplayCronometro(); timerRodando = false; document.getElementById('btn-main-play').innerText = "Começar"; }
-        function atualizarDisplayCronometro() { const m = Math.floor(tempoRestanteSegundos / 60).toString().padStart(2, '0'); const s = (tempoRestanteSegundos % 60).toString().padStart(2, '0'); document.getElementById('timer-display').innerText = `${m}:${s}`; const circle = document.querySelector('.timer-progress'); if(circle && tempoTotalDaTarefaAtual > 0) { const radius = circle.r.baseVal.value; const circumference = radius * 2 * Math.PI; circle.style.strokeDasharray = `${circumference} ${circumference}`; const offset = circumference - (tempoRestanteSegundos / tempoTotalDaTarefaAtual) * circumference; circle.style.strokeDashoffset = isNaN(offset) ? 0 : offset; } }
-        function togglePlayPauseTimer() { if(timerRodando) { pauseTimer(); document.getElementById('btn-main-play').innerText = "Retomar"; } else { playTimer(); document.getElementById('btn-main-play').innerText = "Pausar"; } }
-        
-        let lastTickTimer = 0;
-        function playTimer() { 
-            if(timerRodando || indexCronometro >= filaCronometro.length) return; 
-            timerRodando = true; document.getElementById('btn-main-play').innerText = "Pausar";
-            lastTickTimer = Date.now(); 
-            timerInterval = setInterval(() => { 
-                const agora = Date.now(); const deltaSegundos = Math.floor((agora - lastTickTimer) / 1000); 
-                if (deltaSegundos > 0) { 
-                    const segundosDescontar = Math.min(deltaSegundos, tempoRestanteSegundos);
-                    if (segundosDescontar > 0) { tempoRestanteSegundos -= segundosDescontar; tempoGlobalEstudadoSegundos += segundosDescontar; const hojeStr = getDataStringLocal(); historicoTempo[hojeStr] = (historicoTempo[hojeStr] || 0) + segundosDescontar; atualizarDisplayCronometro(); atualizarDisplayTempoGlobal(); try { localStorage.setItem('estudos_historicoTempo', JSON.stringify(historicoTempo)); localStorage.setItem('estudos_tempoGlobal', tempoGlobalEstudadoSegundos.toString()); } catch(e){} }
-                    lastTickTimer += deltaSegundos * 1000;
-                    if(tempoRestanteSegundos <= 0) { pauseTimer(); alert("⏰ Tempo concluído!"); tarefasDoDia.find(t => t.id === filaCronometro[indexCronometro].id).concluida = true; atualizarDisplayTempoGlobal(); renderizarGraficoTempoOverlay(); salvarDadosLocais(); renderizarTarefasDiaGlobais(); nextTimerTask(); }
-                } 
-            }, 1000); 
-        }
-        function pauseTimer() { timerRodando = false; clearInterval(timerInterval); atualizarDisplayTempoGlobal(); renderizarGraficoTempoOverlay(); salvarDadosLocais(); }
-        function nextTimerTask() { pauseTimer(); indexCronometro++; carregarTarefaCronometro(); }
-
-        let simAreaAtual = null; let simTopicoAtual = null; let simModo = 'mix'; let simFila = []; let isGeneratingQuestoes = false; let simRespondidasMix = 0; let simRespondidasSaved = 0; let simTotalSaved = 0;
         function atualizarEstatisticasGlobais() {
             const edital = bancoDeEditais[editalAtualId]; if(!edital) return; let ac = 0, er = 0; 
             if(edital.areas) { edital.areas.forEach(a => { if(a && a.sub) { a.sub.forEach(s => { ac += parseInt(s.acertos || 0); er += parseInt(s.erros || 0); }); } }); }
@@ -1271,78 +1276,126 @@
             const select = document.getElementById('select-disciplina-simulado'); if(select) { select.innerHTML = ''; if(edital.areas) { edital.areas.forEach(area => { if(area && area.sub && area.sub.length > 0) { const group = document.createElement('optgroup'); group.label = area.nome; area.sub.forEach(sub => { const opt = document.createElement('option'); opt.value = `${area.id}|${sub.id}`; opt.innerText = sub.nome; group.appendChild(opt); }); select.appendChild(group); } }); } }
         }
 
-        async function iniciarFocusSimulador() { 
-            const select = document.getElementById('select-disciplina-simulado'); if(!select.value) { alert("Nenhum tópico selecionado."); return; } 
-            const [aId, sId] = select.value.split('|'); simAreaAtual = bancoDeEditais[editalAtualId].areas.find(a=>a.id===aId); if(!simAreaAtual) { alert("Erro ao carregar área. Atualize a página."); return; } simTopicoAtual = simAreaAtual.sub.find(s=>s.id===sId); if(!simTopicoAtual) { alert("Erro ao carregar tópico. Atualize a página."); return; }
-            topicoAtivoAId = aId; topicoAtivoSId = sId;
-            const simModoElem = document.querySelector('input[name="sim-modo"]:checked'); simModo = simModoElem ? simModoElem.value : 'mix';
-            if(!bancoQuestoesLocal[simTopicoAtual.id]) bancoQuestoesLocal[simTopicoAtual.id] = []; simFila = [...bancoQuestoesLocal[simTopicoAtual.id]].sort(() => Math.random() - 0.5);
-            if (simModo === 'mix') { simRespondidasMix = 0; if(simFila.length < 15) { document.getElementById('fullscreen-loader').style.display = 'flex'; document.getElementById('loader-message').innerHTML = 'Conectando ao banco da Banca...<br><span style="font-size: 0.9rem; font-weight: normal; color: #bdc3c7;">Elaborando inéditas com rigor técnico máximo.</span>'; await preencherBufferSimulador(15); document.getElementById('fullscreen-loader').style.display = 'none'; } } else if (simModo === 'saved') { if(simFila.length === 0) { alert("Nenhuma questão salva encontrada para este tópico. Altere o modo para 'Mesclar Inéditas e Salvas'."); return; } simRespondidasSaved = 0; simTotalSaved = simFila.length; }
-            document.body.classList.add('focus-mode'); document.querySelectorAll('.focus-container').forEach(c => c.classList.remove('active-focus')); 
-            document.getElementById('focus-simulador').classList.add('active-focus'); document.getElementById('btn-floating-music').classList.add('visible'); document.getElementById('btn-floating-fullscreen').classList.add('visible'); document.getElementById('btn-floating-notes').classList.add('visible');
-            document.getElementById('simulador-end-screen').style.display = 'none'; document.getElementById('sim-info-disciplina').innerText = `SIMULADO: ${simAreaAtual.nome.toUpperCase()}`; document.getElementById('focus-sim-title').innerText = simTopicoAtual.nome;
-            switchNoteType(); renderizarQuestaoSimulador();
-        }
-
         async function preencherBufferSimulador(quantidade) { if(isGeneratingQuestoes) return; isGeneratingQuestoes = true; try { const payload = { topico: simTopicoAtual.nome, disciplina: simAreaAtual.nome, quantidade: quantidade }; const res = await fetch('https://api-portal-estudos.onrender.com/api/gerar-questoes', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) }); if(res.ok) { const data = await res.json(); if(data.questoes && data.questoes.length > 0) { bancoQuestoesLocal[simTopicoAtual.id].push(...data.questoes); simFila.push(...data.questoes); salvarDadosLocais(); } } } catch(e) { console.error("Falha ao gerar na API", e); } isGeneratingQuestoes = false; }
         function atualizarUIContador() { const statusEl = document.getElementById('sim-counter-status'); if(simModo === 'mix') { statusEl.innerText = `${simRespondidasMix} respondida(s)`; } else { statusEl.innerText = `${simRespondidasSaved}/${simTotalSaved} respondida(s)`; } statusEl.style.opacity = '1'; }
         function toggleEliminateOption(btnElement) { const optionBtn = btnElement.nextElementSibling; btnElement.classList.toggle('eliminated'); optionBtn.classList.toggle('eliminated'); }
-        function renderizarQuestaoSimulador() { document.getElementById('focus-sim-feedback').style.display = 'none'; document.getElementById('btn-proxima-questao').style.display = 'none'; document.getElementById('btn-pular-questao').style.display = 'inline-block'; if (simFila.length === 0) { if(simModo === 'mix') { document.getElementById('simulador-active').style.display = 'none'; document.getElementById('simulador-loading-inline').style.display = 'block'; } return; } document.getElementById('simulador-loading-inline').style.display = 'none'; document.getElementById('simulador-active').style.display = 'block'; atualizarUIContador(); const q = simFila[0]; document.getElementById('focus-sim-enunciado').innerText = q.enunciado; const optionsContainer = document.getElementById('focus-sim-options'); optionsContainer.innerHTML = ''; q.alternativas.forEach(alt => { const letra = alt.charAt(0); optionsContainer.innerHTML += `<div class="sim-option-wrapper"><button class="btn-eliminate" onclick="toggleEliminateOption(this)" title="Descartar alternativa">✖</button><button class="sim-option-btn" onclick="responderQuestaoSimulador('${letra}', this)">${alt}</button></div>`; }); }
-        function responderQuestaoSimulador(letraSelecionada, btnElement) { const q = simFila[0]; const certa = q.gabarito; const acertou = (letraSelecionada === certa); q.respondida = true; q.acertou = acertou; q.respostaUsuario = letraSelecionada; const botoes = document.getElementById('focus-sim-options').querySelectorAll('.sim-option-btn'); botoes.forEach(b => { b.disabled = true; b.classList.remove('eliminated'); if(b.innerText.startsWith(certa)) b.classList.add('sim-option-correct'); else if (b === btnElement && !acertou) b.classList.add('sim-option-wrong'); else b.style.opacity = '0.5'; }); const eliminaBotoes = document.getElementById('focus-sim-options').querySelectorAll('.btn-eliminate'); eliminaBotoes.forEach(b => { b.disabled = true; b.style.opacity = '0.2'; b.style.cursor = 'default'; }); const subMestre = bancoDeEditais[editalAtualId].areas.find(a=>a.id===simAreaAtual.id).sub.find(s=>s.id===simTopicoAtual.id); if(acertou) { subMestre.acertos = (parseInt(subMestre.acertos) || 0) + 1; simTopicoAtual.acertos = subMestre.acertos; } else { subMestre.erros = (parseInt(subMestre.erros) || 0) + 1; simTopicoAtual.erros = subMestre.erros; if(!subMestre.detalhesErros) subMestre.detalhesErros = []; const erroMsg = `Você errou um conceito da questão: "${q.enunciado.substring(0, 50)}..." - Revise!`; if(!subMestre.detalhesErros.includes(erroMsg)) subMestre.detalhesErros.push(erroMsg); } if(simModo === 'mix') simRespondidasMix++; else simRespondidasSaved++; atualizarUIContador(); atualizarEstatisticasGlobais(); salvarDadosLocais(); const feedBox = document.getElementById('focus-sim-feedback'); const feedTitle = document.getElementById('feedback-title'); const feedText = document.getElementById('feedback-text'); feedBox.style.display = 'block'; feedBox.style.borderLeftColor = acertou ? 'var(--success)' : 'var(--danger)'; feedTitle.innerText = acertou ? "✅ Correto!" : "❌ Incorreto"; feedTitle.style.color = acertou ? 'var(--success)' : 'var(--danger)'; feedText.innerHTML = `<strong>Gabarito: ${certa}</strong><br><br>${q.justificativa || 'Nenhuma justificativa fornecida.'}`; document.getElementById('btn-pular-questao').style.display = 'none'; document.getElementById('btn-proxima-questao').style.display = 'inline-block'; if (simModo === 'mix' && simFila.length <= 10 && !isGeneratingQuestoes) { preencherBufferSimulador(10); } }
+        
+        function renderizarQuestaoSimulador() {
+            document.getElementById('focus-sim-feedback').style.display = 'none';
+            document.getElementById('btn-proxima-questao').style.display = 'none';
+            document.getElementById('btn-pular-questao').style.display = 'inline-block';
+            
+            if (simFila.length === 0) {
+                if(simModo === 'mix') {
+                    document.getElementById('simulador-active').style.display = 'none';
+                    document.getElementById('simulador-loading-inline').style.display = 'block';
+                }
+                return;
+            }
+            
+            document.getElementById('simulador-loading-inline').style.display = 'none';
+            document.getElementById('simulador-active').style.display = 'block';
+            atualizarUIContador();
+
+            const q = simFila[0];
+            document.getElementById('focus-sim-enunciado').innerText = q.enunciado;
+            
+            const optionsContainer = document.getElementById('focus-sim-options');
+            optionsContainer.innerHTML = '';
+            
+            q.alternativas.forEach(alt => {
+                const letra = alt.charAt(0); 
+                optionsContainer.innerHTML += `
+                    <div class="sim-option-group" style="margin-bottom: 12px; display: flex; flex-direction: column;">
+                        <div class="sim-option-wrapper" style="display: flex; gap: 10px; align-items: flex-start; margin-bottom: 0;">
+                            <button class="btn-eliminate" onclick="toggleEliminateOption(this)" title="Descartar alternativa">✖</button>
+                            <button class="sim-option-btn" onclick="responderQuestaoSimulador('${letra}', this)">${alt}</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function responderQuestaoSimulador(letraSelecionada, btnElement) {
+            const q = simFila[0]; const certa = q.gabarito; const acertou = (letraSelecionada === certa);
+            q.respondida = true; q.acertou = acertou; q.respostaUsuario = letraSelecionada;
+
+            const botoes = document.getElementById('focus-sim-options').querySelectorAll('.sim-option-btn');
+            botoes.forEach(b => {
+                const letraAtual = b.innerText.charAt(0);
+                b.disabled = true;
+                b.classList.remove('eliminated'); 
+                if(letraAtual === certa) b.classList.add('sim-option-correct');
+                else if (b === btnElement && !acertou) b.classList.add('sim-option-wrong');
+                else b.style.opacity = '0.5';
+
+                // Injecção da Explicação Individual da IA
+                let textoExplicacao = "";
+                if (q.justificativas && q.justificativas[letraAtual]) {
+                    textoExplicacao = q.justificativas[letraAtual];
+                } else if (letraAtual === certa && q.justificativa) {
+                    // Fallback para questões antigas
+                    textoExplicacao = q.justificativa;
+                }
+
+                if (textoExplicacao) {
+                    const isCorretaExp = (letraAtual === certa);
+                    const expDiv = document.createElement('div');
+                    expDiv.style.marginTop = "8px";
+                    expDiv.style.padding = "15px";
+                    expDiv.style.borderRadius = "8px";
+                    expDiv.style.fontSize = "0.95rem";
+                    expDiv.style.lineHeight = "1.5";
+                    expDiv.style.backgroundColor = isCorretaExp ? "rgba(32, 191, 107, 0.1)" : "rgba(235, 59, 90, 0.1)";
+                    expDiv.style.borderLeft = `4px solid ${isCorretaExp ? "var(--success)" : "var(--danger)"}`;
+                    expDiv.style.color = "rgba(255,255,255,0.9)";
+                    expDiv.style.marginLeft = window.innerWidth > 768 ? "55px" : "0px";
+                    expDiv.style.animation = "fadeIn 0.5s ease";
+                    expDiv.innerHTML = `<strong style="color: ${isCorretaExp ? 'var(--success)' : 'var(--danger)'};">${isCorretaExp ? '✅ Correta:' : '❌ Incorreta:'}</strong> ${textoExplicacao}`;
+                    b.closest('.sim-option-group').appendChild(expDiv);
+                }
+            });
+            
+            const eliminaBotoes = document.getElementById('focus-sim-options').querySelectorAll('.btn-eliminate');
+            eliminaBotoes.forEach(b => { b.disabled = true; b.style.opacity = '0.2'; b.style.cursor = 'default'; });
+
+            const subMestre = bancoDeEditais[editalAtualId].areas.find(a=>a.id===simAreaAtual.id).sub.find(s=>s.id===simTopicoAtual.id);
+            if(acertou) {
+                subMestre.acertos = (parseInt(subMestre.acertos) || 0) + 1;
+                simTopicoAtual.acertos = subMestre.acertos;
+            } else {
+                subMestre.erros = (parseInt(subMestre.erros) || 0) + 1;
+                simTopicoAtual.erros = subMestre.erros;
+                if(!subMestre.detalhesErros) subMestre.detalhesErros = [];
+                const erroMsg = `Você errou um conceito da questão: "${q.enunciado.substring(0, 50)}..." - Revise!`;
+                if(!subMestre.detalhesErros.includes(erroMsg)) subMestre.detalhesErros.push(erroMsg);
+            }
+            
+            if(simModo === 'mix') simRespondidasMix++; else simRespondidasSaved++;
+            atualizarUIContador(); atualizarEstatisticasGlobais(); salvarDadosLocais(); 
+
+            const feedBox = document.getElementById('focus-sim-feedback'); const feedTitle = document.getElementById('feedback-title'); const feedText = document.getElementById('feedback-text');
+            feedBox.style.display = 'block'; feedBox.style.borderLeftColor = acertou ? 'var(--success)' : 'var(--danger)';
+            feedTitle.innerText = acertou ? "✅ Resposta Correta!" : "❌ Resposta Incorreta"; feedTitle.style.color = acertou ? 'var(--success)' : 'var(--danger)';
+            
+            if (q.justificativas) {
+                feedText.style.display = 'none';
+            } else {
+                feedText.style.display = 'block';
+                feedText.innerHTML = `<strong>Gabarito: ${certa}</strong><br><br>${q.justificativa || 'Nenhuma justificativa fornecida.'}`;
+            }
+
+            document.getElementById('btn-pular-questao').style.display = 'none';
+            document.getElementById('btn-proxima-questao').style.display = 'inline-block';
+
+            if (simModo === 'mix' && simFila.length <= 10 && !isGeneratingQuestoes) { preencherBufferSimulador(10); }
+        }
+
         function proximaQuestaoSimulador() { simFila.shift(); if (simFila.length === 0 && simModo === 'saved') { mostrarFimSimuladoSalvo(); } else { renderizarQuestaoSimulador(); } }
         function pularQuestaoSimulador() { const q = simFila.shift(); simFila.push(q); renderizarQuestaoSimulador(); if (simModo === 'mix' && simFila.length <= 10 && !isGeneratingQuestoes) preencherBufferSimulador(10); }
         function mostrarFimSimuladoSalvo() { document.getElementById('simulador-active').style.display = 'none'; document.getElementById('simulador-loading-inline').style.display = 'none'; document.getElementById('simulador-end-screen').style.display = 'block'; }
         function reiniciarSimuladoSalvo() { simFila = [...bancoQuestoesLocal[simTopicoAtual.id]].sort(() => Math.random() - 0.5); simRespondidasSaved = 0; simTotalSaved = simFila.length; document.getElementById('simulador-end-screen').style.display = 'none'; renderizarQuestaoSimulador(); }
 
-        async function analisarPDFReal() { const inputCargo = document.getElementById('inputCargo-ia').value.trim(); const input = document.getElementById('file-input'); if (!inputCargo) { alert("Por favor, digite o nome exato do cargo antes de analisar o edital."); return; } if (!input.files || input.files.length === 0) { alert("Por favor, selecione arquivo PDF primeiro."); return; } const userStr = localStorage.getItem('estudos_user'); if(!userStr) { alert("Você precisa fazer login para analisar o PDF."); return; } const userId = JSON.parse(userStr).uid; const arquivo = input.files[0]; const formData = new FormData(); formData.append('cargo', inputCargo); formData.append('arquivoPdf', arquivo); formData.append('userId', userId); const btnGerar = document.getElementById('btn-gerar'); const fullscreenLoader = document.getElementById('fullscreen-loader'); const loaderMessage = document.getElementById('loader-message'); btnGerar.style.display = 'none'; fullscreenLoader.style.display = 'flex'; loaderMessage.innerHTML = '⏳ A Inteligência Artificial está lendo o PDF, filtrando seu cargo e mapeando as disciplinas...<br><span style="font-size: 0.9rem; font-weight: normal; color: #bdc3c7; display:block; margin-top:10px;">Isso pode levar de 30 a 60 segundos. Não feche a página.</span>'; try { const response = await fetch('https://api-portal-estudos.onrender.com/api/analisar-pdf', { method: 'POST', body: formData }); if (!response.ok) throw new Error("Erro na comunicação com o servidor."); const editalDaIA = await response.json(); fullscreenLoader.style.display = 'none'; const novoId = editalDaIA.editalId || 'edital-' + Date.now(); bancoDeEditais[novoId] = editalDaIA; ordemEditais.push(novoId); document.getElementById('file-input').value = ''; document.getElementById('file-name').innerText = ''; document.getElementById('inputCargo-ia').value = ''; document.getElementById('upload-box').style.borderColor = 'var(--border)'; salvarDadosLocais(); selecionarEdital(novoId); mudarAba('disciplinas', document.getElementById('btn-nav-disciplinas')); } catch (erro) { console.error(erro); fullscreenLoader.style.display = 'none'; alert("Erro ao analisar o PDF. Verifique se o backend está rodando."); btnGerar.style.display = 'block'; } }
-        function arquivoSelecionado() { const input = document.getElementById('file-input'); if (input.files.length > 0) { document.getElementById('file-name').innerText = "Arquivo: " + input.files[0].name; document.getElementById('btn-gerar').style.display = 'block'; document.getElementById('upload-box').style.borderColor = 'var(--success)'; } }
-
-        let currentRankingParam = null;
-        function buscarConcursoWeb() { const searchInput = document.getElementById('input-busca-concurso').value.trim(); if(!searchInput) { alert("Digite o nome do concurso."); return; } document.getElementById('loader-ranking').style.display = 'block'; document.getElementById('resultado-busca-ia').style.display = 'none'; setTimeout(() => { document.getElementById('loader-ranking').style.display = 'none'; currentRankingParam = { id: 'sim-' + Date.now(), nome: "Prefeitura de Petrolina - Professor de Geografia (Fev/2026)", pesoGerais: 1, pesoEspecif: 2, totalVagas: 15, notaCorteHist: 85, notaPrimeiroHist: 110 }; document.getElementById('resultado-busca-ia').innerHTML = `<div class="ranking-card"><h4>📄 Edital Encontrado e Analisado</h4><p style="color:var(--success); font-weight:bold; margin-top:-5px; font-size:1.1rem;">${currentRankingParam.nome}</p><div class="parameters-grid"><div class="param-item"><span>Peso Conhec. Gerais</span><strong style="color:var(--title-color);">Multiplica por ${currentRankingParam.pesoGerais}</strong></div><div class="param-item"><span>Peso Específicas</span><strong style="color:var(--title-color);">Multiplica por ${currentRankingParam.pesoEspecif}</strong></div><div class="param-item"><span>Nota de Corte Analisada</span><strong style="color:var(--title-color);">${currentRankingParam.notaCorteHist} pontos</strong></div><div class="param-item"><span>Vagas Ofertadas</span><strong style="color:var(--title-color);">${currentRankingParam.totalVagas} vagas</strong></div></div><p style="font-size: 0.9rem; color: var(--text-muted); border-top: 1px dashed var(--border); padding-top: 15px;">Insira seus acertos abaixo:</p><div class="user-input-grid" style="display:flex; gap:10px;"><div class="user-input-group" style="flex:1;"><label style="display:block; color:var(--text-muted); font-weight:bold; margin-bottom:5px;">✅ Acertos Gerais</label><input type="number" id="input-acertos-gerais" onkeydown="if(event.key==='Enter') calcularPosicaoAutomatica()"></div><div class="user-input-group" style="flex:1;"><label style="display:block; color:var(--text-muted); font-weight:bold; margin-bottom:5px;">✅ Acertos Específicas</label><input type="number" id="input-acertos-especif" onkeydown="if(event.key==='Enter') calcularPosicaoAutomatica()"></div></div><button class="btn-primary" style="width: 100%; font-size: 1.1rem; margin-top:15px;" onclick="calcularPosicaoAutomatica()">Cruzar Dados e Ver Colocação 🏆</button><div id="box-resultado-calculo" class="ranking-result-box"></div></div>`; document.getElementById('resultado-busca-ia').style.display = 'block'; }, 3000); }
-        function calcularPosicaoAutomatica() { if(!currentRankingParam) return; const acGerais = parseInt(document.getElementById('input-acertos-gerais').value); const acEspec = parseInt(document.getElementById('input-acertos-especif').value); if(isNaN(acGerais) || isNaN(acEspec)) { alert("Preencha a quantidade de acertos."); return; } const notaFinal = (acGerais * currentRankingParam.pesoGerais) + (acEspec * currentRankingParam.pesoEspecif); const resultBox = document.getElementById('box-resultado-calculo'); resultBox.style.display = 'block'; resultBox.className = 'ranking-result-box'; const nc = currentRankingParam.notaCorteHist; const nt = currentRankingParam.notaPrimeiroHist; const vg = currentRankingParam.totalVagas; if (notaFinal >= nt) { resultBox.classList.add('res-aprovado'); resultBox.innerHTML = `<span class="medal-icon">🥇</span><strong>FENOMENAL!</strong><br>Sua nota ponderada foi <strong>${notaFinal} pontos</strong>.<br><span style="font-size: 1.5rem;">Sua posição: 1º Lugar</span>`; } else if (notaFinal >= nc) { const ratio = (nt - notaFinal) / (nt - nc); let pos = Math.round(1 + (vg - 1) * ratio); if(pos < 1) pos = 1; if(pos > vg) pos = vg; resultBox.classList.add('res-aprovado'); resultBox.innerHTML = `<span class="medal-icon">✅</span><strong>DENTRO DAS VAGAS!</strong><br>Sua nota ponderada foi <strong>${notaFinal} pontos</strong>.<br><span style="font-size: 1.5rem;">Sua posição estimada: ${pos}º Lugar</span>`; } else { const ratio = (nc - notaFinal) / nc; let pos = Math.round(vg + (vg * 10) * ratio); resultBox.classList.add('res-reprovado'); resultBox.innerHTML = `<span class="medal-icon">💪</span><strong>CONTINUE FOCANDO!</strong><br>Sua nota ponderada foi <strong>${notaFinal} pontos</strong>.<br><span style="font-size: 1.2rem;">Sua posição estimada: ~${pos}º Lugar</span><br><span style="font-size: 0.9rem; color: var(--text-muted);">Faltaram apenas ${nc - notaFinal} pontos para o corte.</span>`; } }
-    </script>
-    
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, OAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-        const firebaseConfig = { apiKey: "AIzaSyAVQAXBRggX3Swl52BYXqmMPaKmL5lCaGg", authDomain: "bringel-portal-de-estudos.firebaseapp.com", projectId: "bringel-portal-de-estudos", storageBucket: "bringel-portal-de-estudos.firebasestorage.app", messagingSenderId: "204721157984", appId: "1:204721157984:web:28fe44df30af67d5791005" };
-        const app = initializeApp(firebaseConfig); const auth = getAuth(app); const googleProvider = new GoogleAuthProvider(); const microsoftProvider = new OAuthProvider('microsoft.com');
-
-        function updateUI(user) {
-            if (user) {
-                const userData = { uid: user.uid, name: user.displayName || "Estudante", email: user.email, photo: user.photoURL || "https://ui-avatars.com/api/?name=Estudante&background=0fb9b1&color=fff" };
-                localStorage.setItem('estudos_user', JSON.stringify(userData));
-                if(window.baixarDadosDaNuvem) window.baixarDadosDaNuvem(user.uid);
-                if(window.checkSpotifyAuth) window.checkSpotifyAuth(user.uid);
-            } else { localStorage.removeItem('estudos_user'); }
-            if(window.checkLogin) window.checkLogin();
-        }
-
-        onAuthStateChanged(auth, (user) => { updateUI(user); });
-
-        const btnGoogle = document.getElementById('btn-login-google');
-        if(btnGoogle) {
-            const originalGoogleHtml = btnGoogle.innerHTML;
-            btnGoogle.addEventListener('click', async () => {
-                try { btnGoogle.innerHTML = '<div class="spinner" style="width:20px; height:20px; border-width:3px; margin:0 auto;"></div>'; await signInWithPopup(auth, googleProvider); btnGoogle.innerHTML = originalGoogleHtml; } catch (error) { console.error("Erro Google:", error); alert("Falha no login com o Google."); btnGoogle.innerHTML = originalGoogleHtml; }
-            });
-        }
-
-        const btnMicrosoft = document.getElementById('btn-login-microsoft');
-        if(btnMicrosoft) {
-            const originalMicrosoftHtml = btnMicrosoft.innerHTML;
-            btnMicrosoft.addEventListener('click', async () => {
-                try { btnMicrosoft.innerHTML = '<div class="spinner" style="width:20px; height:20px; border-width:3px; margin:0 auto;"></div>'; await signInWithPopup(auth, microsoftProvider); btnMicrosoft.innerHTML = originalMicrosoftHtml; } catch (error) { console.error("Erro Microsoft:", error); alert("Falha no login com a Microsoft."); btnMicrosoft.innerHTML = originalMicrosoftHtml; }
-            });
-        }
-
-        const btnLogout = document.getElementById('btn-logout-firebase');
-        if(btnLogout) {
-            btnLogout.addEventListener('click', async () => {
-                try { await signOut(auth); localStorage.removeItem('estudos_user'); localStorage.removeItem('estudos_bancoDeEditais'); localStorage.removeItem('estudos_ordemEditais'); localStorage.removeItem('estudos_editalAtualId'); localStorage.removeItem('estudos_historicoTempo'); localStorage.removeItem('estudos_tempoGlobal'); localStorage.removeItem('estudos_escalaTempo'); localStorage.removeItem('estudos_mostrarGraficoTempo'); localStorage.removeItem('estudos_tarefasDoDia'); localStorage.removeItem('estudos_tarefasDaSemana'); localStorage.removeItem('estudos_bancoDeRankings'); localStorage.removeItem('estudos_bancoQuestoes'); localStorage.removeItem('estudos_modoEscuro'); localStorage.removeItem('estudos_sync'); localStorage.removeItem('spotify_access_token'); localStorage.removeItem('spotify_code_verifier'); localStorage.removeItem('estudos_minhasNotas'); window.location.reload(); } catch (error) { console.error("Erro ao sair:", error); }
-            });
-        }
     </script>
 </body>
 </html>
